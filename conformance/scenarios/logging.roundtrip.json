@@ -1,0 +1,14 @@
+{
+  "id": "logging.roundtrip",
+  "category": "logging",
+  "description": "send records with attributes and trace ids, flush, and find them with the query client",
+  "requires": ["query"],
+  "steps": [
+    { "op": "send", "args": { "message": "conformance hello ${run}", "severity": "INFO", "attributes": { "run": "${run}", "n": 1 } } },
+    { "op": "send", "args": { "message": "conformance error ${run}", "severity": "ERROR", "attributes": { "run": "${run}", "n": 2 },
+      "traceId": "4bf92f3577b34da6a3ce929d0e0e4736", "spanId": "00f067aa0ba902b7" } },
+    { "op": "flush" },
+    { "op": "searchUntil", "args": { "query": "${run}", "minCount": 2, "timeoutMs": 60000 }, "expect": { "minCount": 2 } },
+    { "op": "stats", "expect": { "equals": { "dropped": 0, "failed": 0 } } }
+  ]
+}

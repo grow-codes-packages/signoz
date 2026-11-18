@@ -1,0 +1,17 @@
+{
+  "name": "signoz-typescript-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Runnable example for @grow-codes/signoz.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node main.ts"
+  },
+  "dependencies": {
+    "@grow-codes/signoz": "file:../../typescript"
+  }
+}

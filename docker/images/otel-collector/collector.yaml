@@ -1,0 +1,56 @@
+# YAML form of SIGNOZ_COLLECTOR_CONFIG from the Grow stack template (OTLP -> ClickHouse).
+# The DSN comes from SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN (base, no database) via env expansion.
+receivers:
+  otlp:
+    protocols:
+      grpc: { endpoint: "0.0.0.0:4317" }
+      http: { endpoint: "0.0.0.0:4318" }
+processors:
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 5s
+  signozspanmetrics/delta:
+    metrics_exporter: signozclickhousemetrics
+    metrics_flush_interval: 60s
+    aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA
+    enable_exp_histogram: true
+    dimensions_cache_size: 100000
+    latency_histogram_buckets: [100us, 1ms, 2ms, 6ms, 10ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 1400ms, 2000ms, 5s, 10s, 20s, 40s, 60s]
+    dimensions:
+      - { name: service.namespace, default: default }
+      - { name: deployment.environment, default: default }
+extensions:
+  health_check: { endpoint: "0.0.0.0:13133" }
+exporters:
+  clickhouselogsexporter:
+    dsn: ${env:SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN}/signoz_logs
+    timeout: 45s
+    use_new_schema: true
+  clickhousetraces:
+    datasource: ${env:SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN}/signoz_traces
+    timeout: 45s
+    use_new_schema: true
+  signozclickhousemetrics:
+    dsn: ${env:SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN}/signoz_metrics
+    timeout: 45s
+  metadataexporter:
+    dsn: ${env:SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN}/signoz_metadata
+    enabled: true
+    timeout: 45s
+    cache: { provider: in_memory }
+service:
+  extensions: [health_check]
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [clickhouselogsexporter, metadataexporter]
+    traces:
+      receivers: [otlp]
+      processors: [signozspanmetrics/delta, batch]
+      exporters: [clickhousetraces, metadataexporter]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [signozclickhousemetrics, metadataexporter]

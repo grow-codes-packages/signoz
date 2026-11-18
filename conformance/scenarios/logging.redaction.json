@@ -1,0 +1,12 @@
+{
+  "id": "logging.redaction",
+  "category": "logging",
+  "description": "attributes named like secrets are redacted before they leave the process",
+  "requires": ["query"],
+  "steps": [
+    { "op": "send", "args": { "message": "conformance redaction ${run}", "attributes": { "run": "${run}", "password": "hunter2-${run}", "api_key": "k-${run}" } } },
+    { "op": "flush" },
+    { "op": "searchUntil", "args": { "query": "redaction ${run}", "minCount": 1, "timeoutMs": 60000 },
+      "expect": { "minCount": 1, "stringForm": { "notContains": "hunter2-${run}" } } }
+  ]
+}

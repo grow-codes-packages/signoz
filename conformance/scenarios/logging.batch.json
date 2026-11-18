@@ -1,0 +1,13 @@
+{
+  "id": "logging.batch",
+  "category": "logging",
+  "description": "send 1000 records with small batch limits; all are accepted and searchable",
+  "requires": ["query"],
+  "batchOptions": { "maxBatchSize": 100, "maxQueueSize": 2000, "flushIntervalMs": 200 },
+  "steps": [
+    { "op": "sendBatch", "args": { "count": 1000, "message": "conformance batch ${run} #{i}", "attributes": { "run": "${run}" } } },
+    { "op": "flush" },
+    { "op": "stats", "expect": { "equals": { "sent": 1000, "dropped": 0 } } },
+    { "op": "searchUntil", "args": { "query": "${run}", "minCount": 1000, "timeoutMs": 90000 }, "expect": { "minCount": 1000 } }
+  ]
+}

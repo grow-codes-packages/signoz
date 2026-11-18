@@ -1,0 +1,104 @@
+# SigNoz real-service fixture for grow-codes-packages/signoz (GRO-1372), per sdk-kit SPEC §8.
+# Mirrors the Grow stack templates signoz-clickhouse / signoz-otel-collector / signoz
+# (platform agent-core/src/migrations/seeds/gro1285-observability-templates.ts). No host ports.
+#
+# Test containers need only:
+#   GROW_SIGNOZ_URL=http://signoz:8080                 (query API, header SIGNOZ-API-KEY)
+#   GROW_SIGNOZ_OTLP_ENDPOINT=http://signoz-otel-collector:4318   (OTLP/HTTP; gRPC on :4317)
+#   /bootstrap/env (volume `bootstrap`, read-only)     -> SIGNOZ_API_KEY, ...
+#
+# All credentials below are throwaway test-only values (never used outside this compose project).
+name: signoz-sdk
+
+x-test-only:
+  clickhouse-password: &ch-password "signoz-test-only-ch"
+  clickhouse-dsn: &ch-dsn "tcp://default:signoz-test-only-ch@signoz-clickhouse:9000"
+
+services:
+  signoz-clickhouse:
+    image: grow-sdk/signoz-clickhouse:25.12.5-hq0.0.1
+    build:
+      context: ./images/clickhouse
+    environment:
+      CLICKHOUSE_PASSWORD: *ch-password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ulimits:
+      nofile: { soft: 262144, hard: 262144 }
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8123/ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 60
+      start_period: 5s
+
+  signoz-otel-collector:
+    image: grow-sdk/signoz-otel-collector:0.144.15
+    build:
+      context: ./images/otel-collector
+    environment:
+      SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN: *ch-dsn
+      SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION: "false"
+      SIGNOZ_OTEL_COLLECTOR_TIMEOUT: "10m"
+    depends_on:
+      signoz-clickhouse: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:13133/"]
+      interval: 3s
+      timeout: 3s
+      retries: 100
+      start_period: 10s
+
+  service:   # service under test (harness contract); reachable as `signoz`
+    networks:
+      default:
+        aliases: [signoz]
+    image: signoz/signoz-community:v0.150.0
+    environment:
+      SIGNOZ_TELEMETRYSTORE_PROVIDER: clickhouse
+      SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN: *ch-dsn
+      SIGNOZ_SQLSTORE_PROVIDER: sqlite
+      SIGNOZ_SQLSTORE_SQLITE_PATH: /var/lib/signoz/signoz.db
+      SIGNOZ_TOKENIZER_JWT_SECRET: "signoz-test-only-jwt-secret-0123456789abcdef"
+      SIGNOZ_USER_ROOT_ENABLED: "true"
+      SIGNOZ_USER_ROOT_EMAIL: admin@stack.local
+      SIGNOZ_USER_ROOT_PASSWORD: "Gw1-signoz-test-only-Passw0rd"
+      SIGNOZ_ANALYTICS_ENABLED: "false"
+      SIGNOZ_STATSREPORTER_ENABLED: "false"
+    volumes:
+      - signoz-data:/var/lib/signoz
+    depends_on:
+      signoz-clickhouse: { condition: service_healthy }
+      signoz-otel-collector: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/v1/health?live=1"]
+      interval: 3s
+      timeout: 3s
+      retries: 100
+      start_period: 10s
+
+  # One-shot: logs in as the root admin, creates a Viewer service account + API key,
+  # writes /bootstrap/env (KEY=value). Idempotent (re-uses a still-valid key).
+  bootstrap:
+    image: grow-sdk/signoz-tools:alpine3.24.4
+    build:
+      context: ./images/tools
+    environment:
+      SIGNOZ_URL: http://signoz:8080
+      SIGNOZ_ADMIN_EMAIL: admin@stack.local
+      SIGNOZ_ADMIN_PASSWORD: "Gw1-signoz-test-only-Passw0rd"
+      SIGNOZ_OTLP_GRPC_ENDPOINT: http://signoz-otel-collector:4317
+      SIGNOZ_OTLP_HTTP_ENDPOINT: http://signoz-otel-collector:4318
+    volumes:
+      - bootstrap:/bootstrap
+      - ./bootstrap:/scripts:ro
+    entrypoint: ["/bin/sh", "/scripts/bootstrap.sh"]
+    depends_on:
+      service: { condition: service_healthy }
+    restart: "no"
+
+volumes:
+  clickhouse-data:
+  signoz-data:
+  bootstrap:

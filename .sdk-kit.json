@@ -1,0 +1,2710 @@
+{
+  "sdkKitVersion": "0.1.0",
+  "key": "signoz",
+  "categories": [
+    "logging",
+    "tracing"
+  ],
+  "packageVersion": "0.1.0",
+  "service": {
+    "key": "signoz",
+    "display": "SigNoz",
+    "service": "Signoz",
+    "pkg": "signoz",
+    "keySnake": "signoz",
+    "keyUpper": "SIGNOZ",
+    "categories": [
+      "logging",
+      "tracing"
+    ],
+    "image": "signoz/signoz-community:v0.150.0 (+ signoz-otel-collector + ClickHouse)",
+    "port": "8080",
+    "upstreamLicense": "MIT core + SigNoz Enterprise licence (`ee/`)",
+    "vendor": "SigNoz, Inc.",
+    "env": "`SIGNOZ_URL`, `SIGNOZ_API_KEY`, `SIGNOZ_OTLP_ENDPOINT`, `SIGNOZ_INGESTION_KEY` (cloud), `GROW_SIGNOZ_*`",
+    "npm": "@grow-codes/signoz",
+    "crate": "grow-signoz",
+    "pypi": "grow-signoz",
+    "pyImport": "grow_signoz",
+    "goModule": "github.com/grow-codes-packages/signoz/go",
+    "maven": "codes.grow.packages:signoz",
+    "javaPackage": "codes.grow.packages.signoz",
+    "portsNote": "8080 (UI/API), 4317/4318 (OTLP collector)"
+  },
+  "generatedFiles": [
+    {
+      "path": ".dockerignore",
+      "sha256": "31e05840ca1235a5e3b39d311ee323e57bb28fdefce97d08fceb7ffdc97318ec",
+      "generated": true
+    },
+    {
+      "path": ".editorconfig",
+      "sha256": "6ff5b8311cfcac2aa9e612f269eff648fbd01580f8d91ca1db5ece645aaa538e",
+      "generated": true
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.yml",
+      "sha256": "5e582c8621d0a9b8065bc859b9d64f04b4880998a8d8e1ba4745d8f330a63763",
+      "generated": true
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/config.yml",
+      "sha256": "afe380ad454741819b621bd8192dfa5db52fbc24be046aa6394ee7bd13286771",
+      "generated": true
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/feature_request.yml",
+      "sha256": "4150f0def4f3883a455a272822bde31a3e318f648120cce8f9dcc6fc2e9d31a4",
+      "generated": true
+    },
+    {
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "sha256": "12aa22a1517b5b8fb017c2ba2d0c21e35d6c2636ece2cea05007885ab19c2007",
+      "generated": true
+    },
+    {
+      "path": ".github/dependabot.yml",
+      "sha256": "4e43efba6a51273b4f53b1d742b5f3aa5466188b81032223271e76fb55ef3064",
+      "generated": true
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "f11e35a8e6023fe43f8be1dd85047ad6c415af33e8debd2a8b729a9e43edf68f",
+      "generated": true
+    },
+    {
+      "path": ".github/workflows/docs.yml",
+      "sha256": "84323b36ece841421f55218afd133990d5c28725e0a7a0af1be7694455265432",
+      "generated": true
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "1f128545d6e649b40229df0a3dfabcd36afcbad6a4c99979c0922b89bc9c3f8c",
+      "generated": true
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "37d893bf5366e79798b62de4010b6ddd2147bd0936248e247355dc1ee521d67a",
+      "generated": true
+    },
+    {
+      "path": ".release-please-manifest.json",
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "generated": false
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "9376cdf0197c848c08b2bc786c0cca637d810d1d0044fb01817dbfdf0b362cd4",
+      "generated": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "symlink": "AGENTS.md"
+    },
+    {
+      "path": "CODE_OF_CONDUCT.md",
+      "sha256": "f395f78a160e38d408d8a58eb4ae7afab2dd6d5d72e6812bb7d6c0d69686b92b",
+      "generated": true
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "sha256": "79b6a7082bd6fb0a241459c3797085b4c54814cd28a1a5a4ceaa589a8a9b0cce",
+      "generated": true
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "240a568e95de530b3ff4751150e764af6e70ec4b9375750ccc8bfacbb3b2c0f4",
+      "generated": false
+    },
+    {
+      "path": "Makefile",
+      "sha256": "9d33118803a34a589fd7cb58138531d1464b5465202daf0023a9c77166ac43bd",
+      "generated": true
+    },
+    {
+      "path": "NOTICE",
+      "sha256": "fdc5996fcc332ccb2306fbfc6d8ca7aaf38aec6ec7bbdbacacc730a7255bd2ad",
+      "generated": false
+    },
+    {
+      "path": "README.md",
+      "sha256": "caf2987f32b4e3ac5af3ba8b7288107245ad978dcdf3fe5138749f673744f6f3",
+      "generated": false
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "78968d33ddf2926fcc0a389f392cfeded3ba5c2b74d470897aca231516b82a33",
+      "generated": true
+    },
+    {
+      "path": "conformance/VERSION",
+      "sha256": "e9dd8507f4bf0c6f42458e41aea833ad0bd3f6127272335eee9bf4d58541ed67",
+      "generated": false
+    },
+    {
+      "path": "conformance/core-unit.md",
+      "sha256": "81d2cf3928e2e89f37ed4f69aff0a18618e10f5570fe675603aa4ff10cbce331",
+      "generated": false
+    },
+    {
+      "path": "conformance/scenarios/core.health.json",
+      "sha256": "43190884470262855c2a056530c6c7ed3a7f6097bc78b25a0f78256a9e734c55",
+      "generated": false
+    },
+    {
+      "path": "conformance/scenarios/logging.batch.json",
+      "sha256": "d8819769e8cc2eb093f2082c91c4065e5d6e6a5823ce8860acf03f7e6143bd64",
+      "generated": false
+    },
+    {
+      "path": "conformance/scenarios/logging.redaction.json",
+      "sha256": "5da8e309f186f1c40ee8d5341c30feb1c5e496db391b12ec368ce2a2d428f345",
+      "generated": false
+    },
+    {
+      "path": "conformance/scenarios/logging.roundtrip.json",
+      "sha256": "005e564f58d6b798a874397a640b68c882fffe07988eaa68d51193a058ab2b0f",
+      "generated": false
+    },
+    {
+      "path": "conformance/scenarios/tracing.services.json",
+      "sha256": "40f2fb8321d45ed6b8f07e42caac1a57ddf834d5d75a4f30347a1dfc98429a8b",
+      "generated": false
+    },
+    {
+      "path": "conformance/scenarios/tracing.tree.json",
+      "sha256": "7506120aad32f82d44e40e7629d19f2c68dac6b6e3840638b429adba91890807",
+      "generated": false
+    },
+    {
+      "path": "conformance/schemas/log-record.schema.json",
+      "sha256": "02513a060598725070919cee7a33871018ab77840acc1c0c367ccdecd91b831d",
+      "generated": false
+    },
+    {
+      "path": "conformance/schemas/telemetry-draft.schema.json",
+      "sha256": "2d29e5ceea9cc05fb56747fa680ad4d414728bbcc6137ec56dce85de4fabea98",
+      "generated": false
+    },
+    {
+      "path": "conformance/schemas/trace.schema.json",
+      "sha256": "0cdace52525673c76216b4244caaf16d68e58fcc73cff2b980448e7827733c12",
+      "generated": false
+    },
+    {
+      "path": "docker/Dockerfile.go",
+      "sha256": "807531e28675cf90d1b905b64eadc7317d5112b2b1dee61ebb4a0756d25c9439",
+      "generated": true
+    },
+    {
+      "path": "docker/Dockerfile.java",
+      "sha256": "e117dddf22b6ad48241216c250699e8a0b2b462f8c063e1f50be28ca38e4fbc1",
+      "generated": true
+    },
+    {
+      "path": "docker/Dockerfile.python",
+      "sha256": "08e7dea65836457af7d4804f3d7253dc46d9d2a1ef8fbb3e260953b271cb7093",
+      "generated": true
+    },
+    {
+      "path": "docker/Dockerfile.rust",
+      "sha256": "51b318741c25222255b1417a247853f0cda3951365c6dd45e51833958b84d6dc",
+      "generated": true
+    },
+    {
+      "path": "docker/Dockerfile.typescript",
+      "sha256": "485fb2e61e2f170039c24b002212ef287d9c71197a11c689bf380a5519e2a14a",
+      "generated": true
+    },
+    {
+      "path": "docker/bootstrap/README.md",
+      "sha256": "bbe442b8d1d40c12eef6a73d12563193387baf345bc815437b36f667e53d4a8d",
+      "generated": false
+    },
+    {
+      "path": "docker/bootstrap/bootstrap.sh",
+      "sha256": "dafdb65ea4e9e6b0032d6e0e0bd782e1e9bc45d7ef18fb660710384d98f6ef8b",
+      "generated": false
+    },
+    {
+      "path": "docker/bootstrap/lib.sh",
+      "sha256": "ef9a634fef57959faf4aa189c5c264f00e30ce911e2cd50234206cc819ca1909",
+      "generated": true
+    },
+    {
+      "path": "docker/compose.service.yml",
+      "sha256": "ef7786798ddb47fae68214da2250fff6cf8eb749f1fc8e531549cbea624fe958",
+      "generated": false
+    },
+    {
+      "path": "docker/compose.yml",
+      "sha256": "e2d8a79a57eee7b4075cd725d354e0b59d0adce26ae35e1cce8207536f9582ca",
+      "generated": true
+    },
+    {
+      "path": "docker/harness/compose-run.sh",
+      "sha256": "b90bc6be3181cee7e869bd06a3de32ece3d423fbeb46134d15acd2e98b9aae75",
+      "generated": true
+    },
+    {
+      "path": "docker/harness/wait-for-http.sh",
+      "sha256": "5387e6dedfed547b5287c5aa99db352882b9a449c1fc699ab45202ab4b0b4cfb",
+      "generated": true
+    },
+    {
+      "path": "docker/harness/wait-for-tcp.sh",
+      "sha256": "a3df77444ca0987940b1fd055d477e0c3a5dfdf07739a729d913f2a789427c2a",
+      "generated": true
+    },
+    {
+      "path": "docs/.overrides/.icons/grow/logo.svg",
+      "sha256": "00f50edb0ed5447303f6587370365553d62b193db07587c8468bbe762f50e69e",
+      "generated": true
+    },
+    {
+      "path": "docs/.overrides/assets/favicon.svg",
+      "sha256": "6948bc6e2614467d1fcbde590e7a5b624f8cc0e2371021ae0cb79d864915d15a",
+      "generated": true
+    },
+    {
+      "path": "docs/.overrides/grow.css",
+      "sha256": "869d7dcf5bdb233de79e55f3c4cf224ed5b921b1dbb9a0dc776fac958c110623",
+      "generated": true
+    },
+    {
+      "path": "docs/.overrides/main.html",
+      "sha256": "74cd6a18230be87edfb191299a5cfd24cf47ae69101454bb27da81877f4d31ca",
+      "generated": true
+    },
+    {
+      "path": "docs/.overrides/partials/copyright.html",
+      "sha256": "2eb4a3571d6423a294414b621a4c6869bf7773af1dcd11ea7becd66b6fb7ef87",
+      "generated": true
+    },
+    {
+      "path": "docs/api.md",
+      "sha256": "71000f739c16df824b207dd9fddaceea2dec84c49588c7c0b0173565bbe48848",
+      "generated": true
+    },
+    {
+      "path": "docs/client.md",
+      "sha256": "d8159cc73b27d0401b1cc1546d82ea2b19822a4be5444263a5708a0181743eb9",
+      "generated": true
+    },
+    {
+      "path": "docs/compatibility.md",
+      "sha256": "bc4b1291436682b4759f27ed05657549e3498fa221338403461a370c508ab1e8",
+      "generated": false
+    },
+    {
+      "path": "docs/configuration.md",
+      "sha256": "934dd71888b854625e3828d08aaa6d3200a47878c3b2b36f4a366f4aea4fbabb",
+      "generated": true
+    },
+    {
+      "path": "docs/docker-testing.md",
+      "sha256": "45059f25aac2ca71ff362a087d79a138f9ce172f72ac10e20890071dda449ba2",
+      "generated": true
+    },
+    {
+      "path": "docs/errors.md",
+      "sha256": "c3455807dc1973aaac20671c8ea79896e68e7997afa1909d374ef222c4df9a2d",
+      "generated": true
+    },
+    {
+      "path": "docs/functions.md",
+      "sha256": "7d10f1e4839f3c99c8e9e0645071b4d6e53e8be74955d3d5f8b0ee3a7ab48ec0",
+      "generated": false
+    },
+    {
+      "path": "docs/hooks.md",
+      "sha256": "75aedda9eb5784b965e3dd2b28f2b2c56ebd44901da3bec3afb2916565778b74",
+      "generated": true
+    },
+    {
+      "path": "docs/index.md",
+      "sha256": "286e61988779f0b2cc99475b8e7e14e96d9e2c38d6ab4817d7096eb1cfeb8049",
+      "generated": false
+    },
+    {
+      "path": "docs/install.md",
+      "sha256": "d8c5aadbf4321fc166460ea24b3ee80e2b415dd1138642310b9fa838e027ffdd",
+      "generated": true
+    },
+    {
+      "path": "docs/license.md",
+      "sha256": "e24d83cc76eaeeab10b586ca2253b4f9525cc9ade8f4ec59030d175fa0ffbf82",
+      "generated": true
+    },
+    {
+      "path": "docs/logging.md",
+      "sha256": "7bad71651ca896ba3a4c869efa025155ea46fdaf1e2f862e009fa75c86fccf21",
+      "generated": true
+    },
+    {
+      "path": "docs/quickstart.md",
+      "sha256": "2d08b5edae208f98decadd43809e1cba54e6e839782a35f46193558d867bb981",
+      "generated": false
+    },
+    {
+      "path": "docs/redaction.md",
+      "sha256": "0c3641e462ec715637c006c49da5094253ec802138e7457f40ff62c3e488d6a2",
+      "generated": true
+    },
+    {
+      "path": "docs/requirements.txt",
+      "sha256": "8fbc4770eae893da1185935d1d88f048ea8db8059e43f59ebc01bda79cf32eb1",
+      "generated": true
+    },
+    {
+      "path": "docs/tracing.md",
+      "sha256": "533fffb80073344e61b3bc9bf7a40a943377a5805b10d3e33a71cef69737725f",
+      "generated": true
+    },
+    {
+      "path": "docs/troubleshooting.md",
+      "sha256": "5b76b07a6bbc8f8edfa6dbdbf1853632811fce67022030005278b00b48c27ea5",
+      "generated": true
+    },
+    {
+      "path": "examples/go/go.mod",
+      "sha256": "6b6bad37b031cbb1e36e79762bffbca166be65b14759d5cda96ca6789bcb0e19",
+      "generated": false
+    },
+    {
+      "path": "examples/go/main.go",
+      "sha256": "f1280b843775b08a6cab081d34cc25053284569bcdf9c21006376f52bdfba375",
+      "generated": false
+    },
+    {
+      "path": "examples/java/README.md",
+      "sha256": "709920342d43d1daa2ed61db1f127253796faa958fb671a6c67493347cf37bee",
+      "generated": false
+    },
+    {
+      "path": "examples/java/pom.xml",
+      "sha256": "dcbc73d45ecc95d51c3e53a9c4b5d538266737772eda058e912597de92f98782",
+      "generated": false
+    },
+    {
+      "path": "examples/java/src/main/java/codes/grow/packages/signoz/examples/AsyncExample.java",
+      "sha256": "82847b38e56bb671994c6a859e1f10b810a7aef8f5815ad7d6e90b8872e517b8",
+      "generated": false
+    },
+    {
+      "path": "examples/java/src/main/java/codes/grow/packages/signoz/examples/BasicExample.java",
+      "sha256": "bc818d9a64d1f284b8122baff641339806bd5d43a66a46f61ea27a8c746b0187",
+      "generated": false
+    },
+    {
+      "path": "examples/java/src/main/java/codes/grow/packages/signoz/examples/HooksAndLoggingExample.java",
+      "sha256": "59509a9b4456e232c85a3005b43033cac2c5a8015f9a127c7bbab63fd206ce75",
+      "generated": false
+    },
+    {
+      "path": "examples/python/README.md",
+      "sha256": "24fea2dc6538d5faba9bc149bdbbcb74434804e5f9ced4c43ec4f1631a8ccd80",
+      "generated": false
+    },
+    {
+      "path": "examples/python/async_basic.py",
+      "sha256": "bda5e13560b85d144219556d255f0cc7953db5bc7b7e2eefcf384fc846de88e8",
+      "generated": false
+    },
+    {
+      "path": "examples/python/basic.py",
+      "sha256": "9b0f0431f780081c0ef15a86df3bde0e8e015b68aa7b31156765abf13704d28c",
+      "generated": false
+    },
+    {
+      "path": "examples/python/hooks_and_logging.py",
+      "sha256": "2498159662cb62b5211e7690b94e092185976c4b8acb9e3e82bbe38b3d792b1b",
+      "generated": false
+    },
+    {
+      "path": "examples/rust/.gitignore",
+      "sha256": "9cc2c8cc102e0b2a0a177c8f594abc9b9776300a04473c24b45d52c1007a4119",
+      "generated": false
+    },
+    {
+      "path": "examples/rust/Cargo.toml",
+      "sha256": "aaa4d0f0a1dd9412300962447d53b86f48b15d9d156e9601d30613eef1be613d",
+      "generated": false
+    },
+    {
+      "path": "examples/rust/src/main.rs",
+      "sha256": "884c9b01098dbb68a0f0579d8b31b3a88cc3e7d81a3230298eb9c8b6bfb73059",
+      "generated": false
+    },
+    {
+      "path": "examples/typescript/README.md",
+      "sha256": "955bd082192f525a5cf19dbe1fa3c68513897206f716937b0f1e0fdbc1d70ae1",
+      "generated": false
+    },
+    {
+      "path": "examples/typescript/main.ts",
+      "sha256": "70b9d55a2d809e23f22167531fc4c7faaf40015b1ae628fae7d72975b3b6234f",
+      "generated": false
+    },
+    {
+      "path": "examples/typescript/package.json",
+      "sha256": "ea8ef432b21d5000fec6cc0d18e1d4c3fcc3c9722084c9d909db46aa8a8b1888",
+      "generated": false
+    },
+    {
+      "path": "go/.gitignore",
+      "sha256": "4c15d8b5bdd825742f6b1b1508c076a0151e6e55b50d1a48265907fda7d7e3ed",
+      "generated": false
+    },
+    {
+      "path": "go/.golangci.yml",
+      "sha256": "3456a4cc090908f8748cd6b9b8fac1a086574ce3b1c6b787eee660428d2acc72",
+      "generated": false
+    },
+    {
+      "path": "go/Makefile",
+      "sha256": "2cbb8a6cebf0465b44395534982a01a44754f8331879a87f957b427eefaf06cd",
+      "generated": true
+    },
+    {
+      "path": "go/client.go",
+      "sha256": "00d3c37f9382c1e70d4ba3aa3840916550e6dd6c0537ea5c3d3ff68254121145",
+      "generated": false
+    },
+    {
+      "path": "go/client_test.go",
+      "sha256": "3eb0da51d64cea87c741783a5523d821bdc2692cfe93e6de4fcdcf098c265c46",
+      "generated": false
+    },
+    {
+      "path": "go/config.go",
+      "sha256": "e8b7c3022519ee1b285fdb1e0592ce1b527f74f42216c2649ee662c292f80f6b",
+      "generated": false
+    },
+    {
+      "path": "go/core_config.go",
+      "sha256": "8029e6a19785c188b9b2a9f38f382cc95ea23ffcc213e4f61cd9fe1586542e2e",
+      "generated": true
+    },
+    {
+      "path": "go/core_env.go",
+      "sha256": "eb7f36c2fa7f5b510eaa2e9971254f638f6bf76b8caaded8ecb1c1aeb51b17d3",
+      "generated": true
+    },
+    {
+      "path": "go/core_errors.go",
+      "sha256": "a397ef84613528529d037b8788074009b335c4ff9abb6c1f1896349fdb3f382e",
+      "generated": true
+    },
+    {
+      "path": "go/core_health.go",
+      "sha256": "7d56ffebe5ad0049b2799172dba7baa711b24c6b18b74abb7320101621838416",
+      "generated": true
+    },
+    {
+      "path": "go/core_hooks.go",
+      "sha256": "cba7172df1e421f98fe616ed800e623ee4c52b29035d68078cead2332fd7a117",
+      "generated": true
+    },
+    {
+      "path": "go/core_poll.go",
+      "sha256": "db48fbe39023f896a372a0fafcd191053914306bd29873d1028a7b45caa3d4c4",
+      "generated": true
+    },
+    {
+      "path": "go/core_redact.go",
+      "sha256": "815365c5837c807aa1009a2e22837e4b4596ddc6677b6c0bd73f3200b025f13f",
+      "generated": true
+    },
+    {
+      "path": "go/core_retry.go",
+      "sha256": "0cc9a086dd6835945bbd9fe5f88d83bf3b125186d02bdd0e049e26692e59c272",
+      "generated": true
+    },
+    {
+      "path": "go/core_secret.go",
+      "sha256": "9819b8d44bab5480f4fe649118a341a69c0a5c593c7e8f3a4fa0a5ff017d5953",
+      "generated": true
+    },
+    {
+      "path": "go/core_testutil_test.go",
+      "sha256": "300ae7594c255897042afa13ae59b7f3eccb39d0e9c8403ba4e125e79534517e",
+      "generated": true
+    },
+    {
+      "path": "go/core_tls_test.go",
+      "sha256": "7b3f158e85830bd74fcc89f3198aa684a89038c85c2d16d769578d98d3fa3d0d",
+      "generated": true
+    },
+    {
+      "path": "go/core_transport.go",
+      "sha256": "4b326eb4a357d169870ea20435eda6c51d3264925be04265c0f03a33a8943957",
+      "generated": true
+    },
+    {
+      "path": "go/core_transport_test.go",
+      "sha256": "fb5832141e889653eaf138024ede447bef0205c56cd07a80b0ba1e7fe2789b39",
+      "generated": true
+    },
+    {
+      "path": "go/core_units_test.go",
+      "sha256": "736cb9b4a86e80bff157691c02763dee8010665e3d3d4306efa2803c93fcb940",
+      "generated": true
+    },
+    {
+      "path": "go/doc.go",
+      "sha256": "d32429051d7e5a9977f191f0cf3c2b250a98c0e604bf3de209929e3b4d0d78c9",
+      "generated": false
+    },
+    {
+      "path": "go/go.mod",
+      "sha256": "c29cc919ac5b8823256f4a1863bb41f0e73d53e45e2fa3fa6b00b1ced919d77c",
+      "generated": false
+    },
+    {
+      "path": "go/grpcadapter/grpcadapter.go",
+      "sha256": "064046054fec6ca087ba39912d187c0a77ebb29cd5e0cce90dcee840dded9844",
+      "generated": true
+    },
+    {
+      "path": "go/grpcadapter/grpcadapter_test.go",
+      "sha256": "0bc791f6e546aea31825a16e8ce261a8450719eea3cb5be68a98dc86296e2f53",
+      "generated": true
+    },
+    {
+      "path": "go/integration/conformance_test.go",
+      "sha256": "168e527377cdbf17eb9b2528ba2cda53c6dbd63d12bdf7e20505a1218ebbfa12",
+      "generated": true
+    },
+    {
+      "path": "go/integration/factories_test.go",
+      "sha256": "a0b42306fae520b3a40b521c5e345ad7588bd30fb076b4bc703fac53896764cc",
+      "generated": false
+    },
+    {
+      "path": "go/integration/go.mod",
+      "sha256": "3968dd67210b30e88504fafd2ec43ff4c98f38f43457bf850c6a4ec9f050170d",
+      "generated": false
+    },
+    {
+      "path": "go/internal/tools/covergate/main.go",
+      "sha256": "88c6121c53672eed1075f0c9f2e546f1bd4f260abcff8b31fc8a5682f30aa838",
+      "generated": true
+    },
+    {
+      "path": "go/internal/tools/covergate/main_test.go",
+      "sha256": "11c6884a723ef339caa94d49c2e2c24ff142f1ca84cf9439cea1253eddf19eef",
+      "generated": true
+    },
+    {
+      "path": "go/logging_batch.go",
+      "sha256": "c5320757d198724a9be9775eaa548d3f6a0019e50dd7601a53fb4b303ae702d0",
+      "generated": true
+    },
+    {
+      "path": "go/logging_batch_test.go",
+      "sha256": "cad237a6054109e55adcea03076e2329149a0a8148749272b8e56f747ed3675d",
+      "generated": true
+    },
+    {
+      "path": "go/logging_client.go",
+      "sha256": "1a66008ef605975de0a64d2f31370e2d38a112f33629bfff19d1421d0f50c7f3",
+      "generated": true
+    },
+    {
+      "path": "go/logging_client_test.go",
+      "sha256": "89a028e2907bbcadf4eadf2c541d400e74997f3e63a9aab105b9593c831201a3",
+      "generated": true
+    },
+    {
+      "path": "go/logging_json.go",
+      "sha256": "f9bd8ffd27ec579c2a0762dc2bdd1efb1ea87c24632c61d79394d2feb080dc0a",
+      "generated": true
+    },
+    {
+      "path": "go/logging_logger.go",
+      "sha256": "1e3bce9ac74d8ddae1320a7ea395b10a6029f8cbff74b6c8ff86d54a4364b6db",
+      "generated": true
+    },
+    {
+      "path": "go/logging_query.go",
+      "sha256": "4b3a830732ab105917b1610e6132be3c35a745a6c13cc42adfe05eae7fade686",
+      "generated": true
+    },
+    {
+      "path": "go/logging_query_test.go",
+      "sha256": "a4ec540eb0e4b8f6a1a2518bc0bdc285ab626e25f00f127d35f4e72d4c8a5290",
+      "generated": true
+    },
+    {
+      "path": "go/logging_redaction.go",
+      "sha256": "1c540a2f18952d8c05afcf4db9f3b2a9e49d04cfc9f8fa5a256fe768d298877c",
+      "generated": true
+    },
+    {
+      "path": "go/logging_slog.go",
+      "sha256": "a1076d6b1c58461d0c3e3ad7ad8fe32a76c303f736d2c07681a476f8e0f7b6da",
+      "generated": true
+    },
+    {
+      "path": "go/logging_types.go",
+      "sha256": "173af3bd4ea3bf4e864f8512e34a775fcb1cb4d71ec233b9a65f734ae979afa8",
+      "generated": true
+    },
+    {
+      "path": "go/logging_types_test.go",
+      "sha256": "ebb9bdb6f012f5cc629d07a982a80024d468614f9b6b33d8c164061a8e5683de",
+      "generated": true
+    },
+    {
+      "path": "go/testkit/core_ops.go",
+      "sha256": "b2781b3210d64e19a2fe187abfabc2f46489983a3669a46c167c6dc1d608f726",
+      "generated": true
+    },
+    {
+      "path": "go/testkit/logging_memory.go",
+      "sha256": "cac26eddd7f926e4e5ee41f7e210b10eaa8b09db5db9e7d20f5c18814f7b1e73",
+      "generated": true
+    },
+    {
+      "path": "go/testkit/logging_ops.go",
+      "sha256": "90611628ef7dec6be991b3802bd0f8440270195c9da6594faf5a31914d15693d",
+      "generated": true
+    },
+    {
+      "path": "go/testkit/logging_test.go",
+      "sha256": "1711562280baf87dde46c9184a70c2ebf22071e5c067af06e6b6031039265186",
+      "generated": true
+    },
+    {
+      "path": "go/testkit/runner.go",
+      "sha256": "bd127a82fefd2afbbae68bc11207dff2b0c3232bd2dd0d553dee30e7f497801c",
+      "generated": true
+    },
+    {
+      "path": "go/testkit/runner_test.go",
+      "sha256": "a9812253495e7bcd3cbebd7d37ba543b52f3be33e3c1b1fd71eb4bdb3ebc736b",
+      "generated": true
+    },
+    {
+      "path": "go/testkit/tracing_memory.go",
+      "sha256": "45518b589b6e1202cfc74150bc34bbe3995ab52803375ab36a511610f78a84f2",
+      "generated": true
+    },
+    {
+      "path": "go/testkit/tracing_ops.go",
+      "sha256": "dc440d6d25931cc442a7511a3d2484990f85b8a4a5582f898b82af3ef48983d6",
+      "generated": true
+    },
+    {
+      "path": "go/testkit/tracing_test.go",
+      "sha256": "a83cf7b2e1c30a67c20000d336295d73d6e4e062ff68dd11e74b2d1a8badcab4",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_config.go",
+      "sha256": "1f2c9d0d8bf4ca695e27d24a83edc2e02088033e7cb0128f66bba8f20fca4522",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_config_test.go",
+      "sha256": "c6a1b363f932636bc82d0418f5d8eabe45d889c52eb01b011192d3919e3b3904",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_helpers.go",
+      "sha256": "0fde9d1697a70ec16f3aa11b0402878529270f8810d8a3b1c18900d0d38044bf",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_helpers_test.go",
+      "sha256": "9625c070e1656aa21566a138afde798e035ff3f66e1bf4b25603e4df5f9c89a2",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_http.go",
+      "sha256": "69991536e50725a9ba5f2a58d9a1b92e2cc4464af621e04475b84662b8c597b0",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_init.go",
+      "sha256": "0c1ac11d535665721306b0565be5911087ace96bd96b2f23c9950332e3a0174b",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_init_test.go",
+      "sha256": "957f46b6a56a00483fd3817efd4ee02626abc3e898317618a784286fc775b1d8",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_model.go",
+      "sha256": "525eee89f27b7241d6381a94469f730f8921159fe91b17d486e59d28c10448b5",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_model_test.go",
+      "sha256": "5581ac1ce2815a867c6c00fd65ce0b25fb64127fe041f6e267b246d3b9157a86",
+      "generated": true
+    },
+    {
+      "path": "go/tracing_query.go",
+      "sha256": "95ae675fd3e8770cb8f2002afe2f4caf74279ff8076e2d085b6db90ddc325e2f",
+      "generated": true
+    },
+    {
+      "path": "go/version.go",
+      "sha256": "78b945c30f842a82a4129e349554badda496d15e22d949e133a63849f828bd72",
+      "generated": false
+    },
+    {
+      "path": "go/zapadapter/zapadapter.go",
+      "sha256": "fdf5dea155f835c643fb4a5b30bc5590ee3188d126c5fb58be648b0633307bb1",
+      "generated": true
+    },
+    {
+      "path": "go/zapadapter/zapadapter_test.go",
+      "sha256": "ff50b760783ab6a93eb4a6a48a4b2d268848a36ebf897a1d57c2a65db652b35a",
+      "generated": true
+    },
+    {
+      "path": "java/.gitignore",
+      "sha256": "a78512e7338498c9e34bb8a6f2f834d3a241b6a5af250a6d8f6e61ba819b4ab4",
+      "generated": false
+    },
+    {
+      "path": "java/.mvn/wrapper/maven-wrapper.properties",
+      "sha256": "e67de487071199117b7c9808dca5f56c73a44b656c925140ec68761947bdd384",
+      "generated": false
+    },
+    {
+      "path": "java/Makefile",
+      "sha256": "fa0687d9fd1c883b61e5622b7d92ae8f1dc94eb609c0e109c3d57f2886db92ec",
+      "generated": false
+    },
+    {
+      "path": "java/integration/.gitignore",
+      "sha256": "b53ee26e6ff1da219b0563333a76d2c9ec19eec713d6ee54e11a1edacb0e9f3d",
+      "generated": false
+    },
+    {
+      "path": "java/integration/pom.xml",
+      "sha256": "b06b06c5b6a413e90eb7c3fcb6497fe003a23919c15da6414708d544f13a8a78",
+      "generated": true
+    },
+    {
+      "path": "java/integration/src/test/java/codes/grow/packages/signoz/integration/ConformanceTest.java",
+      "sha256": "4cb28652fcf3884beb18f565a7c9dd612c54d253fa29fb01d2c064531196092e",
+      "generated": true
+    },
+    {
+      "path": "java/integration/src/test/java/codes/grow/packages/signoz/integration/Factories.java",
+      "sha256": "f1e9d35888a31214cdf66eb13a4f60270ff954028fb15518b430f73818785306",
+      "generated": false
+    },
+    {
+      "path": "java/mvnw",
+      "sha256": "cae96cef89ebea3531221f4ae17c23cf8edf67d00eae8306d4186ae1bbed4d02",
+      "generated": false
+    },
+    {
+      "path": "java/mvnw.cmd",
+      "sha256": "46eedb8419bd14fe70d5bb2916d7b6f51806e51b39d5b76a42610384ca929c1c",
+      "generated": false
+    },
+    {
+      "path": "java/pom.xml",
+      "sha256": "2689585d01687022320ced620254fe0c7f2bc32b095e2f6e3a726e53f6e6f788",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/SignozClient.java",
+      "sha256": "d798a746b5c8b47a381a4eab42b02b00f56c648a8b8b18120f9135beeb1eb261",
+      "generated": false
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/SignozConfig.java",
+      "sha256": "701cfb0ee69e467d3e25ac249cdb58a2fc6b7de295d81571861af7b87ea238ca",
+      "generated": false
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/AuthenticationException.java",
+      "sha256": "88c4cb81c0c5c8908094aa2d2b3e15e8fd0c6513a4e9334eaef1c14e16cfc30a",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/CancelledException.java",
+      "sha256": "41b51ad0f8f58d4f24bd98f505c2f03d8930626306b7b10b782aa06badac22d9",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/ConfigException.java",
+      "sha256": "c9f4403498989a3af91d81866d9e4ecc1438a6e524cce8abece642e18498cada",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/ConflictException.java",
+      "sha256": "eac65a976c3726ea091ea72b268efb9b654cac2802e5049abd6f97b64104dd75",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/EnvReader.java",
+      "sha256": "f937eb633c98108ccf12cecb596eb2c6b7db148698590d5c6855490a5a48c307",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/ErrorCode.java",
+      "sha256": "5793d8df815e004dd4f2ac5aa4408b45fa46ea8778935efa3d81997d0ff8cf6e",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/HealthCheck.java",
+      "sha256": "42059ae31753a1b381958f71a1aba7bde552ab84530f69c74b546fb4593832ac",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/HealthStatus.java",
+      "sha256": "4fa0a8309f34af89191c648c073bf866c4ce0959094930beafb3bec0569365e4",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/Hooks.java",
+      "sha256": "81c8540523f835d561d0d4685908d01e314177c2feeb114e3f248939e4bdfecb",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/HttpTransport.java",
+      "sha256": "b32f7d422d31750b1d4b237dd24987914dc9416a367b4f627d70554c0e54bdf4",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/Json.java",
+      "sha256": "595652ad51c128448746331895f0a036e82ed21b0fe3dd902269034054a7479c",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/Logger.java",
+      "sha256": "ac42fb57bced8fd23f5a03ccb443b88bb58c99d7f36d98ddf548814b29f9971e",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/NotFoundException.java",
+      "sha256": "98f56a238d51ee818cf4ae772e9b088e8eb63c0012b26ac655d433fff01f57c5",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/PermissionDeniedException.java",
+      "sha256": "efc8b381250ea447c0e433fa25c24b7af1975ca56a2104f32f6ae8b7997b77c2",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/Poll.java",
+      "sha256": "2f37f4a15434796d70c3e4c09b2ba1410ad2b95f130426fcb4da0c6c65293c6e",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/RateLimitException.java",
+      "sha256": "21125deb887891686f9f079b3859d8cff62ebf6419ec3adaa95ff3f84c91b215",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/Redaction.java",
+      "sha256": "9fef0a41d0e4a7dc8e243d1d14e9148e59292fdf3c74b67a8cafca52261994fe",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/RetryPolicy.java",
+      "sha256": "e1c1ee7d0529434c611dafb6690a7050c58f647597d4916d4fe85f08b0e45a28",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/SdkInfo.java",
+      "sha256": "16b7b761f3b386d681c26766a6312155cec3d284c6e93990e941beae10f506c7",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/Secret.java",
+      "sha256": "4e36f7ceaaab5a02492e9e40ce89b55fa342ab3078b7b43e692f66465296b6a9",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/SignozException.java",
+      "sha256": "c5aa3ea4ebdcffa49fda57bf92f30e1d048fec7c882103fc0f1338ace2a3e2b9",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/TimeoutException.java",
+      "sha256": "b1558934d61a84d941fb52f806d79dc812bcbbde8ce2474004356e677c647280",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/TlsOptions.java",
+      "sha256": "8161fd99c1c93625447cdeb1a5aaba9aeb85b92c292b92a607f0295180751b74",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/TransportConfig.java",
+      "sha256": "8c3a8ad9c98ab60dd845c3d6d166aa739bed81c857b9a5b82381143ee9e888a9",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/TransportRequest.java",
+      "sha256": "3e1b63b36a59971faf1b3f74b45ae1cc9c8009956c0397f87c07b7576f33cac0",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/TransportResponse.java",
+      "sha256": "b302d59522599cede676a3b2f3aa2431fa3b23bd1f28580e60453eaf2b420d86",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/UnavailableException.java",
+      "sha256": "a85e631f2e9b9e36274add8ba619a9b1c34b4aaa4a1594739301a70ed0e98577",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/UnsupportedException.java",
+      "sha256": "dd11d864e967d1c1824ce23e1d607242524e243350f3cb167b79c14f2c0ac795",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/core/ValidationException.java",
+      "sha256": "d0847766a8368b837e4c91a268897e5f42e18a79debfc2a0c275a583fb3db066",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/AdapterSupport.java",
+      "sha256": "5935f18baff7e303b5c579a6580d06760c4d9e7f9afb15a5b9f3326daca247c7",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/AttrValues.java",
+      "sha256": "c0d8548bc4c78b708d50acd364b824a840d062d004c426fcf888245e4faaeb31",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/BatchOptions.java",
+      "sha256": "e53bf9a5230a9cf8938c6d85c71542a1117cfe503cf9aff4fe6b07a3db6c88da",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/BatchProcessor.java",
+      "sha256": "7cb0ee9463ff0a813339495c64e923321b39a45a6a70482ccfd76810ae402149",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/BatchStats.java",
+      "sha256": "89bcf92b5e188533d7077bc009e399b9442504978fdce1a7613f64e4a1a098ee",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/BatchingLogClient.java",
+      "sha256": "90b1c56a7ce59d90da5b3d4b7f7e963b23124f7c2f3a2cf74e51b0d00ec27b4c",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/DropPolicy.java",
+      "sha256": "3bb2bfe4a3b14ed7f624f7ebc9072f54b67680860ff73ceb6be277d7514710db",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/DropReason.java",
+      "sha256": "ea8b452b9924855d4bc7f351015e6bc51cbad2ecec2ee49f53c9f43b299c86f6",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/ExportOptions.java",
+      "sha256": "92eeec33f2b2a97afedda4962b384ca8a7e3ca075473e333876a9f26629ebc9d",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/ExportResult.java",
+      "sha256": "f7d158073f633dfa2e42d397de040376beb127508f5bc02fb1067b1af5fbd574",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/GrowJulHandler.java",
+      "sha256": "ad7b30ba9e2331ca1fff84e4b8ea6d3cdf5828fb91efa541748c20eaa0a92d3c",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/GrowLog4j2Appender.java",
+      "sha256": "4d4abeab34493388b30b4412aaf9d643d2c5cc715cfaf3812fcb6ba9fae9b3f0",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/GrowLogbackAppender.java",
+      "sha256": "0b86626e74131b4b371d324dc55ed0e14a7a92a975861bf99be9278b1860200b",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/LogClient.java",
+      "sha256": "50e5d84da9a604c3d597744a13d2f01ea9beb914dbf63186b63ca454ab7672a9",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/LogEntry.java",
+      "sha256": "890d9254eea66bf3670540c516fbfc80a314ad13d18d34646abab6e40bb1fd4b",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/LogExporter.java",
+      "sha256": "9f9f18110bb2d52236000fe18fd848a762ae2091c10ecfb50277ef17f5802120",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/LogIds.java",
+      "sha256": "b662ea5c93a35ccd1ffa7ac17968a5e1560f30de93e95b0c4084ae31572a71e8",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/LogInput.java",
+      "sha256": "cfbfde9f0c38e8e347cb2f7587556d35d6615c9a7754bc0e2e9fac65f8cc0071",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/LogQueryClient.java",
+      "sha256": "b15608ec6722814fd81db6fea91865735e7ce176206af4eaee933ece756de251",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/LogRecord.java",
+      "sha256": "7d2547a87f71b211909e00a09fff70ba3ca0988db2c189e56c1b67084fb5f47e",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/LogRecordJson.java",
+      "sha256": "27ed72d6d3994f306011a0ca52a21e30a55aad70e613c0930890fde65f3f3bf7",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/LogSearchResult.java",
+      "sha256": "46bcbb2c9814104c7465e22dd34d7795dbedd64f28bb1521c77eab7eeecaefcb",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/Logger.java",
+      "sha256": "1f30db594a2fc19761cefd7ee34f6eb0a8d85a01e61a205b0dd3d15bded5fbe8",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/RedactionProcessor.java",
+      "sha256": "9e42b9450702abc691108f814a6cf4a6fe54483f1058f788a9f922814e6cfcdb",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/SdkErrors.java",
+      "sha256": "2369129d945dba0e584ac710721ebf094cd493258476671c038fb4f10775fe84",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/SearchOptions.java",
+      "sha256": "9b723d661539cd23ddd9f258955533cdc0705fe943a8a77e3c4fd3f15a1d1f18",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/Severity.java",
+      "sha256": "d5c7660d3d6e1538efb5077ebf1782f8040d7973c58cfdce2448940a21960e8a",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/SortOrder.java",
+      "sha256": "6ec2b9e33bdc1d0b38e25e60644ca5fa44d936fd3e3b13a1ea1ee1efb98a4ad2",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/TailHandle.java",
+      "sha256": "17e543fb7faf5e90c6a94eb36346725c4478a93dc027ec68c39e29b6637c7ecb",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/TailOptions.java",
+      "sha256": "e076c8ef4b607ac7b781823723a32b026c8d29908e7041f6deffdaa531228c83",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/logging/WaitForLogOptions.java",
+      "sha256": "a1a7e6f324168a1aaccfdd6cc4bc4abae0e8b1e4adbadf3fbba3096b61b53a52",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/package-info.java",
+      "sha256": "65dcc2c9304b132e477e1ee8ce651e0c1769e9a082de331a308bea2b22e5a470",
+      "generated": false
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/ConformanceOps.java",
+      "sha256": "023be61c266cd79b0bbd7037ea907c1b11a5803e198c078c4d73b1b3f57957fd",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/ConformanceReport.java",
+      "sha256": "e998f4dd14a18546184ba95a24547314766944a06876b49a34c5016c54374d53",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/ConformanceRunner.java",
+      "sha256": "cf49a959bd5001c898dccc5b1c5af6d4901d6d5d6534147b6ffe4c3ace774d83",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/CoreOps.java",
+      "sha256": "0018cc94bbda3d2d1e17c568dc12c70973f6ac296c50817f9311d292aca98050",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/Expectations.java",
+      "sha256": "b23d79902ff1defde8882dc898f317d3ddcc4052e1dae2101177ed237d864982",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/JUnitConformance.java",
+      "sha256": "a11dbd492ffd4a74ba195bd3008857633f48c3c2503c1ce04489d315cdbddec3",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/OpHandler.java",
+      "sha256": "9796b18d4e7cf751937a8dd2946834dfa23bf9152a19c61cac83f381f25d0a93",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/OpResult.java",
+      "sha256": "b38364fa1b905942d6599fede91ca3ff1b180b4bcb81fe1380e989cbe716bd00",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/Scenario.java",
+      "sha256": "c66a22e49f10ed94fc076835a429992e4ec02edf62476e36ada16209b7c4439f",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/StepContext.java",
+      "sha256": "e6031426fbcb764a96214208b6a48b58ace36abf5dce37e845b46389b40563c0",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/TargetFactory.java",
+      "sha256": "25ebce40c8c809e72ae1232cb7ee038e73035f451825ef60aa0af8b521acb191",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/logging/InMemoryLogExporter.java",
+      "sha256": "8791dd927c8e0eba14f9e1c1402ae8e00e7c75a3562e384205325642f19db652",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/logging/InMemoryLogQueryClient.java",
+      "sha256": "9a73a3f7fcb2e128ebdd5e10672b2b70314052c325948bae1dd1037a40da2fc8",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/logging/LoggingOps.java",
+      "sha256": "e0b2ae214f8e39586c58d4c1a686955fb99fb9c1733dc8635db520bb542c9623",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/logging/LoggingTarget.java",
+      "sha256": "bedaffd597d27a60af23c1464a05f0b6e6ab6369a33c675ca858657e823580ec",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/tracing/InMemorySpanExporter.java",
+      "sha256": "d677cf2eddb02cb1df304dff17f486829b51ea104387b9af1e2e94f18ac474af",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/tracing/InMemoryTraceQueryClient.java",
+      "sha256": "a1f332133019c4b37a15e71b0443ca4d01143c856696d9bada547f5d30be764b",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/tracing/SpanDataConverter.java",
+      "sha256": "b73c18410fc777857a596688f74f6e42e12ea4168c718bd70ad74c56d171584c",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/tracing/TracingOps.java",
+      "sha256": "7459093451d7967c030819200ebeda5bc4b83dbf4f87ec4a7b8690af1488dbb5",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/testing/tracing/TracingTarget.java",
+      "sha256": "52c2d000076466ce3735ff29a92f98be57db4273c9c9d6540dd0fa11cbaa036b",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/HttpSpans.java",
+      "sha256": "d3befa473c8a2358681ac661682c335c6785f04027ca26ff91b873abc0d2968c",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/OtelAttributes.java",
+      "sha256": "7e70562e026e3693e2a648bee4e436d08cd116aea2cfde67358ff559562bbb0e",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/OtlpExporters.java",
+      "sha256": "64672b35c6667cf84ac25b378b5bff30ad0547b65b85e6ccf051fe711548c377",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/SpanExporterFactory.java",
+      "sha256": "df6e15aaeef52bbd61bff2ea9f2d61e41697679c3207774f83e717d09ad5cd63",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/SpanOptions.java",
+      "sha256": "736300844e45752069430b8cce8af1015cdaa91ea7b3c55659a3014d898d9db5",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/Spans.java",
+      "sha256": "a784408db4f70c85c9ff8a1ae5f0ab5ff68efa3691eb644cd90e5d925dcb1a7d",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/ThrowingRunnable.java",
+      "sha256": "e09eb5396fc6b2d27131b602b3281702fdbb410f4379ffb6b4c16db0c2158839",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/ThrowingSupplier.java",
+      "sha256": "1b6b598de37715a0d341b98657305b43d838d84b0a2e5bdd09750a1da4e6ad8c",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/Traced.java",
+      "sha256": "b80f3b491b349a4469c93dc2bc1cae7265ce8d397f9eeeaac93ae17d81592aab",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/TracedHttpClient.java",
+      "sha256": "5392708dcc8e796326569286d14a3e3812fa1fd95ff5ad2d509b62b969584a78",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/TracedProxy.java",
+      "sha256": "79917e59147ae2b009a07d99930ab35f956a2e3180839c0bebb2e3e8e1664448",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/Tracing.java",
+      "sha256": "d3a6fce122bb0c595775b7a4d713427ba264f3112bdf516a166762124ac2ef64",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/TracingConfig.java",
+      "sha256": "154a46db9d6e522b72295f34d61963c37572af181f87eb199eb3eddfcc14c529",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/TracingFilter.java",
+      "sha256": "33d7e55385b74779e08c80d6e010f6f112d76ba3ffaa93fba6ef9a302738fac6",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/TracingHandle.java",
+      "sha256": "4eecb8751fa1179fcf7a0d90e0c810bd7906c3b0f9f5bec912838060411b14d8",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/TracingInterceptor.java",
+      "sha256": "1a7ce230becc9f105db09fe56add3c97e499e5ac496bd5538fd18c7c49f12735",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/DependencyLink.java",
+      "sha256": "2f13342a289c3d032ad79af151e180f595dd7dc45d2bc0289dcd8ce06716d39a",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/Span.java",
+      "sha256": "344fb588962b6c19b45d295d226567206ab5646bc90a2b81002d1e1b9e10d4bd",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/SpanNode.java",
+      "sha256": "7f74e477bc2978b15a4137a43f0ee0a3e0ccc5f6269859d2edb22f169c95ce87",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/Trace.java",
+      "sha256": "8c82e98b4e7fe26e42c5fb742282c675b9da992219efed3324911f7403da6fe0",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/TraceIds.java",
+      "sha256": "7d78a2e706001a2b3761688a4aa4513d4c2882e3b6ee9dc6f00bce8438d4ff52",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/TraceJson.java",
+      "sha256": "696f618c4f2e0859f9bc6839b5f274d84cf2a5b69438d5836efa838765e2313a",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/TraceQueryClient.java",
+      "sha256": "11f54527aab8364eb5a21378da0ccd4c8d0d5ac1a4c883dc907217865bc3a366",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/TraceSearchQuery.java",
+      "sha256": "934f7ae22b2341609581482347d52e20c4178adf43df75f97d32d2ec4977a14e",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/TraceSummary.java",
+      "sha256": "ec8c4536d7e53b00a091a293121faa71559c5769da0b2384bf4b9994f324b2d2",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/Traces.java",
+      "sha256": "e1a03ecf93cf8e40170226adf0a1f32cd54ac58ccdff296386628cd7c643e3ad",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/java/codes/grow/packages/signoz/tracing/query/WaitForTraceOptions.java",
+      "sha256": "e1647c3d27c3a3765810fd149e857c051ea2f3cb3c664468c03c8d37e941fed4",
+      "generated": true
+    },
+    {
+      "path": "java/src/main/resources/codes/grow/packages/signoz/core/sdk.properties",
+      "sha256": "e5a9f639fe287916e3fed6daf9861b7ef3090742a28bcfa065819df368476eb9",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/SignozClientTest.java",
+      "sha256": "957b951e9aba53f2a2d7a4edae383b8830db5eb2ecdaf6ff4da1172fe8b3aa0e",
+      "generated": false
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/core/CoreUnitsTest.java",
+      "sha256": "3aa93ce3a530b928430163eda0b02e839118095e6d6a654ebfdf437a79ff6001",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/core/HttpTransportTest.java",
+      "sha256": "5d5be4c6778036ad21defc28dba0bcd52b8a8da15bcd04fd34e8f2e42c0d2498",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/core/MockServer.java",
+      "sha256": "831d3da0144f1f0b1b3000b82a5b0d7a16587a6e0d62b5b46566c669deef0aec",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/core/TestCerts.java",
+      "sha256": "26e8ad723991688d17bf0a3fee57ff368b3cf0b85fbee366d0558f246b286d86",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/core/TlsOptionsTest.java",
+      "sha256": "76d81c267bfa3db4f4934454aa64e6d30ec3f061da98c99106ec086c23a1c900",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/logging/BatchProcessorTest.java",
+      "sha256": "a32ca65c6827588841842d287ca59ee9fdbfb4f23920b4afdc1581cd498a4dfc",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/logging/LogAdaptersTest.java",
+      "sha256": "f3d3919394d4751242119d2a1294c85a7f0131598b49d1c15ea99ea7579f2419",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/logging/LogClientTest.java",
+      "sha256": "05a044b6ef9e488de55699f62a3e3cbbf4be88f6aab3e99879b52acf9ca481a3",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/logging/LogModelTest.java",
+      "sha256": "ce66f5438a95822cf7cc2f8c7dd39e481577071055b309ef9fc5f84e7ac3a434",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/logging/LogQueryTest.java",
+      "sha256": "4079712500af0ea75ff65c3cc9c8f09f2a811a785bf7ac1ac2f0171d0da5b955",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/logging/LoggingConformanceTest.java",
+      "sha256": "29eb720ab8427d134a238154744040d2ddf560e6dc0793f662da9109c7ad5b18",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/testing/ConformanceRunnerTest.java",
+      "sha256": "f43b776717862e25814f4c85fc5b3c9765238bd254e31505414c0a8e8bd25238",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/testing/ExpectationsTest.java",
+      "sha256": "6b35009546c6f438c07c17ec4eaaccdaeac76d01af8c51bfc6c5da0d1228063c",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/tracing/HttpAdaptersTest.java",
+      "sha256": "3e724413532eedc10c598834aa9ed60cba11b611faba3418e9f57f01e61141dc",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/tracing/SpansTest.java",
+      "sha256": "df8a1ee8f62266902be9e2be31400f8b9a664da3da236d4b8551c6d7f6b29c07",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/tracing/TraceQueryTest.java",
+      "sha256": "4ce043d64899c86f43cdc6f483b8e6f5f9b729edbb99a3b1717892c21e15db73",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/tracing/TracedProxyTest.java",
+      "sha256": "c66cbd6ade0b3c20aa8d0e2e45fc8cb233314a53aca73e639ae1cd79819774c3",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/tracing/TracingConformanceTest.java",
+      "sha256": "21e824af697c4489b297768c35f9f58138e1348f388211ee3c312df92237f326",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/tracing/TracingFixture.java",
+      "sha256": "4242699fe5532d88975fcc737db48d379d06644cc5afbaef4890982eb8750243",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/java/codes/grow/packages/signoz/tracing/TracingSetupTest.java",
+      "sha256": "f4802bf39a3f28c3c0715502af9a47909beede941f999b1acaeb168673154ffb",
+      "generated": true
+    },
+    {
+      "path": "java/src/test/resources/codes/grow/packages/signoz/core/unfiltered.properties",
+      "sha256": "a88a09dfe34d8e66632ba9147b2b18996e665eca259e651c8ed75bc993a29461",
+      "generated": true
+    },
+    {
+      "path": "mkdocs.yml",
+      "sha256": "14b8596c89f5183ae7fd5dbf4dfb82bccad65555b7c04cb75d2bbea904a53455",
+      "generated": false
+    },
+    {
+      "path": "python/.gitignore",
+      "sha256": "01f3f0fd19ef34925f75f5b0b0f3722e2d23f64cc8d042d784e8fb542a2f8fea",
+      "generated": false
+    },
+    {
+      "path": "python/Makefile",
+      "sha256": "407d581494d129d658778007ab89f4178ccf0d17deb1194be0000800f909643e",
+      "generated": false
+    },
+    {
+      "path": "python/README.md",
+      "sha256": "c49847eb66dea3d8fb05cf2a5150c13bc107cbd71e5c12b03669782959ce0c21",
+      "generated": false
+    },
+    {
+      "path": "python/docs/index.md",
+      "sha256": "df435bcd0ebf4e81225f2c54dbefb11c61ac9eb06c481985106e4ab2c7123e0f",
+      "generated": false
+    },
+    {
+      "path": "python/integration/conftest.py",
+      "sha256": "dc9fff65869e11b9558546a8983f8f97f9a11488fc81b05476ee7979322c6ecc",
+      "generated": false
+    },
+    {
+      "path": "python/integration/factories.py",
+      "sha256": "e1c9da9384378300047915377f0871a31c16404a0e9d73bbd7e59c6e3907c8bf",
+      "generated": false
+    },
+    {
+      "path": "python/integration/pytest.ini",
+      "sha256": "33d992dffbeecbf614fc846a9eb74fae61ac98c142a9b331534d796f3820dcc1",
+      "generated": false
+    },
+    {
+      "path": "python/integration/requirements.txt",
+      "sha256": "ce85c94bb91bcc689bc6c4e47205545eeddce754a853fc5301b7092f29dcef34",
+      "generated": false
+    },
+    {
+      "path": "python/integration/test_core.py",
+      "sha256": "665f18435291fea13e451cbb02ce514b9413627a1304f17d523d8d5df5b0dad2",
+      "generated": false
+    },
+    {
+      "path": "python/mkdocs.yml",
+      "sha256": "d4a0be233810e6708e63f170f7eba8060c87ccbe3afa1e5ebac488878ae39583",
+      "generated": false
+    },
+    {
+      "path": "python/pyproject.toml",
+      "sha256": "e1ac28150a0ff60d0930006b69e65564652874be86da6ba8830d30af4fc0ef0c",
+      "generated": false
+    },
+    {
+      "path": "python/src/grow_signoz/__init__.py",
+      "sha256": "55a571eb6a784d7cca37a959311f195d07a2f8146ab37a43258d25923709ab72",
+      "generated": false
+    },
+    {
+      "path": "python/src/grow_signoz/_core/__init__.py",
+      "sha256": "389dafb82a75337a617860bc246cd236aba5ff71530a87671be1e91db8b873cf",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/cancel.py",
+      "sha256": "3f7cd6569a2a411109d72f9b3ea245db529546dde0fddadf2dd4bf5ab672b13a",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/config.py",
+      "sha256": "501ace1a6aa3c06372c1a7ae128853f59e67ac29a9047e0dcbff616bdbea0b3b",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/env.py",
+      "sha256": "da8a2241a487804352b60cf55f0dd4504f8e55c294daa1fc06bea19c20a256fb",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/errors.py",
+      "sha256": "d23e0fd3542c006e4c4dac964f9e1c18d20fad8cc466902d0fa718da4d72890c",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/health.py",
+      "sha256": "3fdfa5506479435efa0c3c7d6a6ad412ed06558fe23bd8749d1a254e999adc16",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/hooks.py",
+      "sha256": "5584c0b54e37cccfd2f42e291bf9acb46c2f9c5b9c8cae0782becd37f7fd19db",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/http.py",
+      "sha256": "bdc617f2e0c86f8d3883da81c54493252ceb7dfbb869990e58840763a748a7e8",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/redaction.py",
+      "sha256": "354a48f3076ad34b136fbf12605c787bddc9a5cb2d87ff15d6af3c2152ddbe01",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/resources.py",
+      "sha256": "eb3fac01dd54e4e732fbefce1aa7000fee023cd694ac6d1943d7984cde77fb1f",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/retry.py",
+      "sha256": "41a2a14735390a237d21a78e91e827e6f6d2b2fdb037ffdd4052675213a9c756",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_core/useragent.py",
+      "sha256": "11ff3e750ed4623ad035f4459d3c32838c8544aad6384fe8e4549679790fe30d",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_logging/__init__.py",
+      "sha256": "a009d16392fed60a49a65e6636315bd4a37a208780aff8c8d0c15963c909f290",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_logging/_adapters.py",
+      "sha256": "43b51f030ff94535e47e550fcaf22ba61cd3e9c7e04fc07f82523c0cb6e7bb32",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_logging/_batch.py",
+      "sha256": "3e4cdfa2457906c737377eb0c33da5c337f6760ef1d4c93c13954085bb054cc8",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_logging/_client.py",
+      "sha256": "2fc402a29687c0f1c275fb691df7acd017daaf020e7be575a5a94530c7fdc51c",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_logging/_exporter.py",
+      "sha256": "f8f68282f297a1bcebd915ac1966deea8c7923bd74d59bc2a0ba196a52ac297b",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_logging/_model.py",
+      "sha256": "f8480bc14c6e20b2adf77543bff7ca2b67738666f6d831fb3700dafcc72c0b93",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_logging/_query.py",
+      "sha256": "a3b59dc578ec31723351bed62113e2d2c147757ece3037d9a824369604c66a78",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_logging/_redaction.py",
+      "sha256": "27a9b1728730314a74c2c8f7aeb8751e0ca50e2f49428816810ef909fe96a0c8",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_tracing/__init__.py",
+      "sha256": "30cf9d1d11d73fd00783ccde596ba0f024fd5f94df2bfe531d10a27b171c44d8",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_tracing/_adapters.py",
+      "sha256": "8ad5a571cbdc37c636ff6d46c4d58c57fa9b2ed738132f45c464db441720997e",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_tracing/_config.py",
+      "sha256": "456d41d43ae2141530235a82c64bd454c7edae379adbceadd274237ea2811819",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_tracing/_helpers.py",
+      "sha256": "c8c179324bd03fefbf86cbc2c31d8fee789442ece9d546b30278b19bb97737c9",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_tracing/_model.py",
+      "sha256": "c4d0816fac840d3503f63e489576d68a322350b51e214f484224ed27c5783776",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_tracing/_query.py",
+      "sha256": "b997e4eda8c4ce306c7ba6812de4b0ddec2569dfaa9a55f212adfefef8c19d1f",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_tracing/_setup.py",
+      "sha256": "bb031b7e0773ab1af5cc6fe8abb73987e156023854ba456a0ca4d24c56949377",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/_version.py",
+      "sha256": "326553d84c140a43dd807c7e7ffd9a77a0b48f004b8de216cf29e7959ca2ed0e",
+      "generated": false
+    },
+    {
+      "path": "python/src/grow_signoz/client.py",
+      "sha256": "a4e40e3108e592fc6a37552ade79a6a696f22c66f0eeaa9be2f42b1ecef40a9a",
+      "generated": false
+    },
+    {
+      "path": "python/src/grow_signoz/config.py",
+      "sha256": "8a68e0a28a1445c74cc08ea94a912655c4bc6d10de6cbf6a854b9545c1b02e62",
+      "generated": false
+    },
+    {
+      "path": "python/src/grow_signoz/py.typed",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "generated": false
+    },
+    {
+      "path": "python/src/grow_signoz/testing/__init__.py",
+      "sha256": "328466547406bdebfe6578a7f5a887e50e5f22f0187b8089fb075f66f5869088",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/testing/logging_conformance.py",
+      "sha256": "c2832926936541cb6246e3ea9f0ed42373663a33581096db12d9521d4c55a0de",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/testing/memory_logs.py",
+      "sha256": "ddb342048a99f4e6feaa67eceaa78ba254b59e40c9aab29c78c195bd5e51ef3c",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/testing/memory_traces.py",
+      "sha256": "c30b18fb05cac1b7bcae8c2fc27ca5a8a58f25c24d172d183353ec724c1295fd",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/testing/runner.py",
+      "sha256": "35bd2ddad3cee943db000241e13f557aa674f634e11c761d52a6d7e4d6088416",
+      "generated": true
+    },
+    {
+      "path": "python/src/grow_signoz/testing/tracing_conformance.py",
+      "sha256": "224d0a38cb8dfccf5c8b9ede4d94704945dee2a83f21fa776f528364f8536e46",
+      "generated": true
+    },
+    {
+      "path": "python/tests/_support.py",
+      "sha256": "4b5a3d4360278d22befefe9985fc9b87a299047c4d475583e62f36417b06ca80",
+      "generated": false
+    },
+    {
+      "path": "python/tests/conftest.py",
+      "sha256": "7b95144d5dce3966c0c548f9bc8ea543bdfaade588b6855ba9e68cccb15e0f0c",
+      "generated": false
+    },
+    {
+      "path": "python/tests/test_client.py",
+      "sha256": "10d3a6952de279d7947209550f6378f93f9f5562100b63f915ebe79ea74abc3f",
+      "generated": false
+    },
+    {
+      "path": "python/tests/test_conformance_core.py",
+      "sha256": "df0be5033b12addcdb0992849b58b6d21b3c2c2736c758c4d68038ea1d4121e3",
+      "generated": false
+    },
+    {
+      "path": "python/tests/test_core_async.py",
+      "sha256": "064bb803fea9762c29915465229e2fa8c63aba18cb4adaef1d863b789da41381",
+      "generated": false
+    },
+    {
+      "path": "python/tests/test_core_basics.py",
+      "sha256": "2773315f8e2e198e2a43ff8d917fb4ff057b609c75236cc6abefd71eeca49c7f",
+      "generated": false
+    },
+    {
+      "path": "python/tests/test_core_transport.py",
+      "sha256": "a14141f9533bb660eaa2a67ea92790f9cba3f80a6bdd073886bf6f2232cd5381",
+      "generated": false
+    },
+    {
+      "path": "python/tests/test_logging_adapters.py",
+      "sha256": "e5c87fdc4d089723ad20d944a2659639a9a7d7a515c2362340b1e12670de02e0",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_logging_async_batch.py",
+      "sha256": "f83c0e92c7694c14837200ce7b822f2b60641552eb3585477c7ae72ccba2bab6",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_logging_batch.py",
+      "sha256": "864194c0d35e4c4ef63c517751a29024aa8c8a319767e50a130554d002d3b189",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_logging_client.py",
+      "sha256": "5ec0b9c7f94821f8ae54c804c6bab843bc05c2bf5c018f4ae3bed64ff3bdc7a3",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_logging_conformance.py",
+      "sha256": "9697ce11514bccffcb67749ae7f00a37a64b4c1ab6d57148231604bcb2319479",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_logging_model.py",
+      "sha256": "357e780d92975483ecca5ab8baa058459d29ef346b44a71d8f9f69d81c69a804",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_logging_query.py",
+      "sha256": "f1de30262a1b0dcaaf3acc60eae4f5038674fa92cc70024609ee1d1c1a3e9cea",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_tools.py",
+      "sha256": "8c5122d6debebc54ab454de8a90f57aa3ec78834c491ac23a9edbab77938a177",
+      "generated": false
+    },
+    {
+      "path": "python/tests/test_tracing_adapters.py",
+      "sha256": "c576ea2d82d91a26375814732184f2ff1c2c620fa4a9784469cfd550e316601c",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_tracing_conformance.py",
+      "sha256": "260b4903dfc7728c7d5f6115f4334b98467896212e9225f3d4f7fe7006d40dd1",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_tracing_helpers.py",
+      "sha256": "e022bb4ded1988df555a11ebb254e66c4fb299fac8cc8d7352908f476b8e2a2d",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_tracing_model.py",
+      "sha256": "79e78b4ebc99fdf45e232536e335c7a6727488132d89f6135332ea3bdfc1d328",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_tracing_query.py",
+      "sha256": "b32fbeb2c90e5d090274afa04e9a73bf77dd329a675334665cc3965501eed969",
+      "generated": true
+    },
+    {
+      "path": "python/tests/test_tracing_setup.py",
+      "sha256": "b576d4b922b28ec5a0ccb758e9370667909df518a9d953c14f08e8b6792c7132",
+      "generated": true
+    },
+    {
+      "path": "python/tools/covergate.py",
+      "sha256": "ef3e9d92158a21addf97f1b02a773ed3ec039b09d7fc6fcc20f055cb503d8aeb",
+      "generated": false
+    },
+    {
+      "path": "python/tools/licensecheck.py",
+      "sha256": "723cd178d92bc2fafe4ea94c14939ad105978c7daa6e5b4f59bbbb05116776a8",
+      "generated": false
+    },
+    {
+      "path": "release-please-config.json",
+      "sha256": "27fd19fcb54a8e054256ac811bad01576ec11de9e0910bb37a38e7c437d5a927",
+      "generated": false
+    },
+    {
+      "path": "rust/.gitignore",
+      "sha256": "44e19e795df0e74663b0affde31f9aec4e08ec88787e680b404381b33134987a",
+      "generated": false
+    },
+    {
+      "path": "rust/Cargo.toml",
+      "sha256": "c3dfece070089b0f1aef04d35b62a5190e8690ffda4f1a36bfa01679cf2f8e77",
+      "generated": false
+    },
+    {
+      "path": "rust/Makefile",
+      "sha256": "0bfe801058f79cd2908b07a7c120107971518ce0f8ea9395a6cdc3ba5705b5f8",
+      "generated": true
+    },
+    {
+      "path": "rust/README.md",
+      "sha256": "992bbf43ac73573cb6aa6c5859db896121a3ae6b52efc3d9d794aa79e228b6b3",
+      "generated": false
+    },
+    {
+      "path": "rust/deny.toml",
+      "sha256": "72a8595069abc9490478ca307e58852664d8354e91775df47ab02c89c47131e5",
+      "generated": true
+    },
+    {
+      "path": "rust/integration/Cargo.toml",
+      "sha256": "65f3b321fa4d8c9fafa740dc34121e807a8af8feeeba0924bd262ddc66e52d81",
+      "generated": false
+    },
+    {
+      "path": "rust/integration/src/lib.rs",
+      "sha256": "da8a2bafd6ebeccec4930b11777c5ef5dd540ae6c10e8a7818a9bf99df69b21c",
+      "generated": false
+    },
+    {
+      "path": "rust/integration/tests/conformance.rs",
+      "sha256": "4f711afe641f428bc2571bc0516b39a4b005a257d9970b0428f49a99150905cd",
+      "generated": false
+    },
+    {
+      "path": "rust/rustfmt.toml",
+      "sha256": "7c1c7eba80a4b7aa292c77b7ee8acb92d9caf13bf58cd59a9e72a6568ca1c8e0",
+      "generated": false
+    },
+    {
+      "path": "rust/src/blocking.rs",
+      "sha256": "ebdbe0249c0c2ac7d00eaad8828f9a14a6f19fee59acec5003c6b104bbc647ab",
+      "generated": false
+    },
+    {
+      "path": "rust/src/client.rs",
+      "sha256": "a67b91207658fa036923e3b19991f4a953dccfa4540db693621e869a9e1d5e6e",
+      "generated": false
+    },
+    {
+      "path": "rust/src/config.rs",
+      "sha256": "23753b72074db0de442e5ceba093bfa282bc3de99100b6ae688517419ae4482d",
+      "generated": false
+    },
+    {
+      "path": "rust/src/core/clock.rs",
+      "sha256": "2f1229ce501feb1b7ba2061fbf712a915562fd563ad03299a806c16fc52f8008",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/config.rs",
+      "sha256": "ef86b56dcc3997613d4b93ca1a86265398e4eb987126773d4ff1f6bda1c7acbd",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/env.rs",
+      "sha256": "dbe4f6bc0cf08367880f78b461dbe2253bb066fb2a04c2cdaf5a1b6c041de7c1",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/error.rs",
+      "sha256": "44ecdf7a5c036f77c8f0f20cff1074cdf4bab522195141e2ef04bb203435f5f6",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/health.rs",
+      "sha256": "c57c0d6b01d553066226e6047bb434ac41d2503a615ec27b7a734e2b41b74fdd",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/hooks.rs",
+      "sha256": "33bc8a3f1c29c90b7ab83323318fd74b9e35ef09777788e2046bfd7b4557b42b",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/lifecycle.rs",
+      "sha256": "4167e05a84684966cfdab2f0434aee116b5826338ef5ecc44712f26ba7a16302",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/mod.rs",
+      "sha256": "d67f070b9727e003ca56ce16560d7c43d5a661ec0888e1fc3e2e308f8ed2925d",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/poll.rs",
+      "sha256": "187f9ee5bc150336d7b5802b301a8f04ff01d32806f574225a9d7f7ca160ca4d",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/redact.rs",
+      "sha256": "797b465f26309874128501b4397c165fa856b820111d0d74cbec73b100ce63fe",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/retry.rs",
+      "sha256": "d5fbedd4cdb989b92e6af66ed82b6540cccc82ca7866e4fb5a31c1159822f05b",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/secret.rs",
+      "sha256": "9e3dc5f03734cbead1114da6a74c9ab218ed342e0079c17536f956a31f7277a5",
+      "generated": true
+    },
+    {
+      "path": "rust/src/core/transport.rs",
+      "sha256": "3356b3a302bbe5b5e2b41cb06fe65b7559988986405e9a6ef59f33a514967821",
+      "generated": true
+    },
+    {
+      "path": "rust/src/lib.rs",
+      "sha256": "53f9f42d445b0ead7fe809069f8c21fe0a436bdf0eebd13d46dc9bad84e49f56",
+      "generated": false
+    },
+    {
+      "path": "rust/src/logging/batch.rs",
+      "sha256": "62fbafc773a4b413b18b08e86b09ffc78c89cf8a05c7218c281b55274fd43776",
+      "generated": true
+    },
+    {
+      "path": "rust/src/logging/bridge.rs",
+      "sha256": "ab54942ed6f65dc8681b04231f2959bb57ecd8f098f1be3b06e2776c6ba3a9dd",
+      "generated": true
+    },
+    {
+      "path": "rust/src/logging/client.rs",
+      "sha256": "2aacaf5b757f79320e95c3b297ebcf0251f3a3005889353b328fe4c590692357",
+      "generated": true
+    },
+    {
+      "path": "rust/src/logging/exporter.rs",
+      "sha256": "7c830059585b9f57e446b2fe87fe7277642d575cc6253e5eec03448cf7aea61a",
+      "generated": true
+    },
+    {
+      "path": "rust/src/logging/layer.rs",
+      "sha256": "5a2b4539f1579b1f436889347a568ba99625ca99b74a214030ef8dca7114cd1e",
+      "generated": true
+    },
+    {
+      "path": "rust/src/logging/mod.rs",
+      "sha256": "065e8ee091deac1ccef5f953c2354e5fbc133abac005632874e527b019019439",
+      "generated": true
+    },
+    {
+      "path": "rust/src/logging/query.rs",
+      "sha256": "b5c00e667721fbc071007236282b5f8cf240bf0fc51589a2bc6c47773f06476a",
+      "generated": true
+    },
+    {
+      "path": "rust/src/logging/record.rs",
+      "sha256": "5046b79c94dc560e42d46b835ae3f7b1ed5c6f4cd761bca7af2684628fb8c77c",
+      "generated": true
+    },
+    {
+      "path": "rust/src/logging/redaction.rs",
+      "sha256": "3b3dbf5cebc638d648553eaf0ef73bb0cf0516d690e0dd289d2fcbb10c729600",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/core_ops.rs",
+      "sha256": "3568058ed9c3cb2733d2344a79ed45072a3af9dabd5b655c8540ab5ffc6ba988",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/expect.rs",
+      "sha256": "0b5505449b748e9e3d286bcf841568f8bf5db7194aee55629a70ed81ff6955eb",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/logging.rs",
+      "sha256": "2ac2ab72eeaf863950d5ccbbaa77581b0fbc61fcefb274507c0beb78f89dbb95",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/logging_conformance.rs",
+      "sha256": "b5a263be5a5e38f9151f828eafaa33023531c46680ecfbd56fbd0563351a43eb",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/logging_memory.rs",
+      "sha256": "e9b3b47392cb81abde65d8386373ff0af2f0b03c6723e27b7312832b504b0092",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/mod.rs",
+      "sha256": "fa770da3d9e03dc4e312e6c28a17f94978153f53b9c6ae1c927334ac5ad7b5f2",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/runner.rs",
+      "sha256": "61fa3976f7cac0bf4c8fa1e61a865816644d9053dbcc8e71e53e037ffa106655",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/tracing.rs",
+      "sha256": "1749df844e70a892c5af506d2979dde9b953ec184843252d6f452631ad54aeb2",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/tracing_conformance.rs",
+      "sha256": "fbfb416138e34f56f97ade4fecf32f236a35a982486469765f7d273364409c73",
+      "generated": true
+    },
+    {
+      "path": "rust/src/testing/tracing_memory.rs",
+      "sha256": "8ba841d1ea60930e7044dc85a32d2174f4c5784f07b4b49b963f80ff77c5b568",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/config.rs",
+      "sha256": "907516839b417c1473b53ea0fa87f952ae45538d202c173ac6dff47bccdef550",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/helpers.rs",
+      "sha256": "ca76776dca3e2fa42ab37d9e40ff040a1f59f101c7df03e20d72b46d90738acb",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/http_client.rs",
+      "sha256": "859f9f69eff7278b342a80449b409f12df628d8b08027b0179daa0f6e28905ea",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/http_server.rs",
+      "sha256": "76e8366af921b41e0f454c86ca738fc134af0eee342964980f3349c892be8f4d",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/init.rs",
+      "sha256": "63e96b7dba7edbd4f34a29cfccbf64a647addc82ad4d94c632f6e84f5c15c83b",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/mod.rs",
+      "sha256": "0bd2158186633b0587afac2edd2abf00a5b3aed24a6b161e16e1438e1d84ce67",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/model.rs",
+      "sha256": "da65b526fa18be7119ce6bf71d299ac65ae1899db11f2fc4639c4ac74910b2cc",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/otlp.rs",
+      "sha256": "34948afdd1efd34417b93d68b488e16ee55310f090811319a2f9335261278869",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/propagation.rs",
+      "sha256": "9dcd5e903035e7cdf8e1f32fb1450062fff17421d042832050b4d0774e055ff2",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/query.rs",
+      "sha256": "f0ef4890a3e3ad53929b586cbd9c60a07ed320619a55a6f9e92254f0acc9f8bc",
+      "generated": true
+    },
+    {
+      "path": "rust/src/tracing/subscriber.rs",
+      "sha256": "d6f0e48dd30675d14cadf9bea7dd83e82f5adb892818cc00d7dfb6e75096a504",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/blocking.rs",
+      "sha256": "6239493a7ab705240e203331ff262fb7660079803539a3150d15d16da28b185e",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/client.rs",
+      "sha256": "2bbc0ff22574c48fd24a644191111ee76afbebe189292d3aca89ee934c7c841a",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/common/mod.rs",
+      "sha256": "efa4258e5dc9e500ab89c3254d1a404080693c0810ecbc164b955367d02ee378",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/core_config.rs",
+      "sha256": "5dc7929c4ae40790411c3f30049e346a1b089b75793761526c20664a75d54845",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/core_logging.rs",
+      "sha256": "d1bc2fe47730253697f1f145b7942fd76efe33e5a43fb4842236f46621d2e14d",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/core_transport.rs",
+      "sha256": "3cdd2932e361dfd7b0b31ce17d5155db51b88ec55b0573b79f6d927e534af2bb",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/core_units.rs",
+      "sha256": "23ca699ba24edd06d05b6b7f69e2c7881ac58ed960f9c0e2c66202471252385a",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/fixtures/ca.pem",
+      "sha256": "6851c6e302d8dbf8316545a660b948ce9d0be4a5fe90ff8e253d3f687018f78b",
+      "generated": false
+    },
+    {
+      "path": "rust/tests/fixtures/client.key",
+      "sha256": "eee22726ba29532da527b351aa86a4ffd200163383dfb36827b7dae1bd062cf2",
+      "generated": false
+    },
+    {
+      "path": "rust/tests/fixtures/client.pem",
+      "sha256": "6851c6e302d8dbf8316545a660b948ce9d0be4a5fe90ff8e253d3f687018f78b",
+      "generated": false
+    },
+    {
+      "path": "rust/tests/logging_adapters.rs",
+      "sha256": "d8e7fbdfb5e1b1a74611f65fe3027e7f09432046831c09909d5ebb0e37cee0a5",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/logging_batch.rs",
+      "sha256": "888fa5d09529908f251c54bc40269724be586d6c972385cc6afcafbdadfccb61",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/logging_client.rs",
+      "sha256": "bae0bf302bbca3f2dfdb72eedcf26f8832455351e334364764b7704f9beb3a67",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/logging_conformance.rs",
+      "sha256": "3642ded2ff2e5998673c964d81436c24e6263d609326eb1144140e02175f8739",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/logging_query.rs",
+      "sha256": "bb823681f185d3cbc1f6543101b9c7b8d5986daa47d15f2520cc7bd4e7e4bf71",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/logging_records.rs",
+      "sha256": "4e96a3b1524c91ca0a236184ca98b1c2333592932f6adc240d01aac7ffa26220",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/testing_runner.rs",
+      "sha256": "9a051546fb369ffb920c50efe018b6a18f07c501666e820ea467369dc484836d",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/tracing_adapters.rs",
+      "sha256": "09fa39a0d362f55f5f8568d2fb2a6afcc5feb388b21d6c92b1f3b708b05c7a3c",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/tracing_conformance.rs",
+      "sha256": "daf3bfb3153549a94239059812ef616d84645754f603071d630c06cee585a941",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/tracing_local.rs",
+      "sha256": "459b5fa86e25765fee5dcc7248d5fdbf4b366e3795ad93b3046f0ac618e5a980",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/tracing_model.rs",
+      "sha256": "bad75081f571d4aba5376e6a8e7d69595a2d2c7bf0a2cd0860a6e69c281a6ed3",
+      "generated": true
+    },
+    {
+      "path": "rust/tests/tracing_pipeline.rs",
+      "sha256": "62ce9def45e572dab0196c69151fb1e6614ffa0a4517a9eaa3404a4afd294fe9",
+      "generated": true
+    },
+    {
+      "path": "skills/signoz-sdk/SKILL.md",
+      "sha256": "3780ea2e846edb44eb9787a664a90aec02981f54991e8f148976d0f8b165275c",
+      "generated": false
+    },
+    {
+      "path": "typescript/.gitignore",
+      "sha256": "5c1047c750a2666a14d7f1a008f8a2fdc83919fef915293bcff36b44dedc1071",
+      "generated": false
+    },
+    {
+      "path": "typescript/.prettierignore",
+      "sha256": "9efdbd2b612283220544dd94371a8b8b09267226c6c57410062a1398d225eaf0",
+      "generated": true
+    },
+    {
+      "path": "typescript/.prettierrc.json",
+      "sha256": "ac5868af5fec64d1f0285340fd1b9f3536e387a9bd626d9e87ff6fb1098905b1",
+      "generated": false
+    },
+    {
+      "path": "typescript/Makefile",
+      "sha256": "bd644015c4ede038f173cb3be4ecddb40efe44bcaba01c505e9df9f1f3030fe1",
+      "generated": false
+    },
+    {
+      "path": "typescript/README.md",
+      "sha256": "2de523dd607db5944283965aa90e7a475d4a4845fdcd7fb6149e3a4272979c18",
+      "generated": false
+    },
+    {
+      "path": "typescript/eslint.config.js",
+      "sha256": "39ab9ba36449e42f05aab17a484ca8b4114aaef220f313ada66a107351b75eb5",
+      "generated": false
+    },
+    {
+      "path": "typescript/integration/README.md",
+      "sha256": "9243a6b4ca232a14a6646265e934147a4846d6fc4cb1871dc2e9448a5310afc2",
+      "generated": false
+    },
+    {
+      "path": "typescript/integration/package.json",
+      "sha256": "81c4574a4225938a6a1c0461ba20adaefb7ec1a4fb93aa8a526c3715266a5414",
+      "generated": false
+    },
+    {
+      "path": "typescript/integration/test/client.test.ts",
+      "sha256": "c8c058324e3bc2c70ad8161a7172251fe5146b8845159fba7a2717be9d407dc0",
+      "generated": false
+    },
+    {
+      "path": "typescript/integration/test/conformance.test.ts",
+      "sha256": "8f8e4b68bae7ef464b6b631bc45b3ccc86fe08c66ed2a94849e84068f6d53a27",
+      "generated": false
+    },
+    {
+      "path": "typescript/integration/test/env.ts",
+      "sha256": "4d01e4976c06fa4be83c9c9d24882c97a2be99e8ff4edcfdfd8db20a9e33a06f",
+      "generated": false
+    },
+    {
+      "path": "typescript/package.json",
+      "sha256": "de16ca58f0116ed51cd4dd57033e8cdd3ab598d2c879feb06abd9bf288b894de",
+      "generated": false
+    },
+    {
+      "path": "typescript/scripts/coverage-summary.mjs",
+      "sha256": "e2a9958208d11b3d875b65b46d2d469ddb7cd4de50d8881f948680285852c296",
+      "generated": false
+    },
+    {
+      "path": "typescript/scripts/license-check.mjs",
+      "sha256": "4bffff0bf732c4490d51d3b2409b11973e4a28400d16433831748d4067e3fe04",
+      "generated": false
+    },
+    {
+      "path": "typescript/src/client.ts",
+      "sha256": "467163509988109644b8f54613c1c7e5a5fbf2d63b5141ec8b0738f4e875714f",
+      "generated": false
+    },
+    {
+      "path": "typescript/src/config.ts",
+      "sha256": "5418e17a1160d76b41925f0c7f08f886c63d0ffdfdb15a88d14a1dba74ca139c",
+      "generated": false
+    },
+    {
+      "path": "typescript/src/core/abort.ts",
+      "sha256": "34f1f2093daa6c819c617b8ad9c103bdb0031e5ce4a390015518500e8b9a2c7f",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/env.ts",
+      "sha256": "1c3a42c80b5a5baf50f2d64636444566aa3748b9d3130ba88c640b6914d2b09b",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/errors.ts",
+      "sha256": "d4f4a57f9efbc1bdd9222008f307c4e2db5634a5698ab6aeb404e7ccabb2ac43",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/health.ts",
+      "sha256": "6b74c60dcb08c66810c8c24fecc84a1778cf5d78f3ceece2a5598879e3cbe21b",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/hooks.ts",
+      "sha256": "51df6f6089e0ed54e1b292557d52d11bdb424a403a69b08e6b56a87d0d943ced",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/index.ts",
+      "sha256": "30b30001828e2258324f98bfb088b9ca04df9248bcc688f19f74f266ee73b1ce",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/options.ts",
+      "sha256": "2583818bbe16a3c3357ab5f75a88c46e5fa6c0951e701e178c41a00e2f30ca16",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/poll.ts",
+      "sha256": "57d00dd9588b4ebed3a7abbeafe2ad39309342a84ef6e1c770408db1180bb954",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/redaction.ts",
+      "sha256": "c85a186230297d7cb465d233d09dc082952ca445c1f08658f39afaf57f1348e8",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/retry.ts",
+      "sha256": "ff9836735d248ef415430d5b554008ceac9f3e95e0667eefc929c5bed87fd9f1",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/transport.ts",
+      "sha256": "de2286e806a8a545ce1bfa0ba17bac34a51e40d81701a17f57bcb160d4ad71f8",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/core/version.ts",
+      "sha256": "e816c50e0cd5763b2b02e42709f6e221741e823a65fa70640d5c3ac9b2232cc0",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/index.ts",
+      "sha256": "38a7117342e6e90d8789ab418f6cc7c9a761548171b40fa23a6f102cf389aeb7",
+      "generated": false
+    },
+    {
+      "path": "typescript/src/logging/batch.ts",
+      "sha256": "360e8d7af84c7763f47dbcc36097bf4736ce3b4f51eb391ed271e0eb3ca5c2de",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/logging/client.ts",
+      "sha256": "8f540570c100a1bf44ac0052c42b6b5153973e44d4e50c8c3c93dc64ce2351fb",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/logging/index.ts",
+      "sha256": "fb9ea419497b0a1a80c58267f6d4e084dce5dbaa4639c110069089f8f5dea200",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/logging/json.ts",
+      "sha256": "2c52a478bcfb0c781c4a14372edf2e9f866f808175c58b64a06e8a609db1331b",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/logging/logger.ts",
+      "sha256": "7a240355c8609028ca5d473bdf583f9a51dbaf43b3598e7c939c13f5ecbb057a",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/logging/pino.ts",
+      "sha256": "63cccb7a623b476bf9eea54965e8c0576b59f16c79a6a3b79eb71f8ba1580020",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/logging/query.ts",
+      "sha256": "4dfdf6282b69cfae84cc2d6f439ceccbcd2b6bee28a31d8eeeb363b0b5e52dc1",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/logging/redaction.ts",
+      "sha256": "2a61bbf37f26feea9bb1bf79fc390894fa72c022400db149dc995b355e006477",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/logging/types.ts",
+      "sha256": "3c60282c435955218d743fd07641d36c1f2e8c88f0a52710dd6e1834d8e11469",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/logging/winston.ts",
+      "sha256": "0bcc4cff6d167674d0afce40b4f989aaa4d45c39dec0507c31cc57e6dd413170",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/testing/core-ops.ts",
+      "sha256": "b5dba2e8a462d60e38b8e4f615c546f3d6da52052a2a3844bb11f932aa9ae841",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/testing/expect.ts",
+      "sha256": "adb25caaedb93ec5516ebb890d615073f86c8e469c7ff1c371668716aeb304ae",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/testing/index.ts",
+      "sha256": "00ac17f5d36e6710c3b290f4ddfc0b8a0d125d78bdf50b9017788f47b254c966",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/testing/logging-ops.ts",
+      "sha256": "c08465f2ee737bb073b9f8a4473e8e7b5d1d16e82bba006a1f0928902e074cd2",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/testing/memory-logs.ts",
+      "sha256": "8b0cf72acd368bc91c089b4832a16f61b572b125da5c10b80c5a43fe67ac1718",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/testing/memory-traces.ts",
+      "sha256": "6c0a6a26b2b2ce068b700bc8b21c0da45efb2b7ed8369689f02bab0b230f2154",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/testing/ops.ts",
+      "sha256": "a9834ff1055de0d50dd88e3d528907ba1f2c15631de60c533583c2c1801ed2a7",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/testing/runner.ts",
+      "sha256": "05cb204fe5751e7f6e12be98ce97ecf5a035c846a9efc230c25334df86e31698",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/testing/tracing-ops.ts",
+      "sha256": "1a317ba62c222798015e104478775171acc87955fb95586ed8eff2698bc43cfb",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/attributes.ts",
+      "sha256": "6b32e00765b25253593ea5484f7a8102f8b1e5e31e25870f2d577fc7289100d4",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/config.ts",
+      "sha256": "cf599ed898067cb61eab4ae9a45ed6ae4f4d79e85e8e307ada7af7355d7117c9",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/express.ts",
+      "sha256": "d78e6981903feae880963086dfc5fdff1f55391d253b67983d2a284cf6a43696",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/fastify.ts",
+      "sha256": "8f55d7698a9347fef84deef7b1939548d4f0b86a5c17cf148d67dcd383f5bf74",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/fetch.ts",
+      "sha256": "869bd7e1be269c0714a6c230ec4a9671f2efa015b1ae8a15a6663240cd635248",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/helpers.ts",
+      "sha256": "d54a38cb92bfed741eeac6ace58a93574a7d76082e5b6fd56627f8d57c8b718d",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/http.ts",
+      "sha256": "75c1748d5f6896927ef3d0c0611cda650688834b285817166695e49a915fde41",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/index.ts",
+      "sha256": "dce98fc26665dddc5a875c49c2131147c2a591ca4f66befc553eb2909b0f3fd6",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/init.ts",
+      "sha256": "fc28c1b33dea41d3ca5ed5cf53f287923e71e0a8eb3a769390c086f561f9ffb9",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/model.ts",
+      "sha256": "ec0d847d082275d299790c6cb3d78e4df27f601a7346f0c9b817657d798dbaf3",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/nest.ts",
+      "sha256": "e24ef473ad187f0eeec89e0c209ee7e79d79d43483b0e64a0b57df9e15634064",
+      "generated": true
+    },
+    {
+      "path": "typescript/src/tracing/query.ts",
+      "sha256": "973eb0b9ccd5984bf137be97eef4b5ac65db339aacf09602bf0bcfe3e055329e",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/client.test.ts",
+      "sha256": "5704d17392e6e1c989133b7e385da35942f40811400fb93461de8d67712d706f",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/core/env.test.ts",
+      "sha256": "78e33f0b706acbd64ad3f476c7ff40eeeb7c84f4104e9945d27a8e2bea0fd7d5",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/core/errors.test.ts",
+      "sha256": "ee982cdff0baf17e089fc555827b0697f7d04eaead37341a7e36a6571b42700f",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/core/misc.test.ts",
+      "sha256": "edcf09ed157a0537f59b79e14ffc5b2bba30967633c4969d6044d00ebfe470cb",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/core/redaction.test.ts",
+      "sha256": "57bc7c687bab8095621a19f932b7f3de99fa52f0e88c2811a399dc5ec6d3d831",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/core/retry.test.ts",
+      "sha256": "04762ec9bbc952e81efbeee6420839d4de8b1ba5ff79cd2d7d516084fb594551",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/core/tls.test.ts",
+      "sha256": "7d209cd7cda48008dbe26bed44dd6319eed616bd2e26d2fa264138fe6449523f",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/core/transport.test.ts",
+      "sha256": "c6e62ba063a489141d7d3f25d0b554ecd1bd5e096eff84569eeb1e25985f62f4",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/helpers/logger.ts",
+      "sha256": "807994885966ea99e97e53c3f25e91631903e5843b3418c718a213f01ba18170",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/helpers/server.ts",
+      "sha256": "6909848d4b8f86ea33ef9571a1443684041d011d53d12d3cf82d7d23a2941589",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/logging/adapters.test.ts",
+      "sha256": "ed91d8faecd180193ba4d7cc22b681ac9e7dbc0e826895c099e576831a176c27",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/logging/batch.test.ts",
+      "sha256": "71155527f80b60197071cd0682a54db399626d8225b8f598af41d5c5546e4ae5",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/logging/client.test.ts",
+      "sha256": "f0713a1fcbcc627e711105dcc7c717d7fcbd3cc627ecbac2b1406468ab4b74fd",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/logging/conformance.test.ts",
+      "sha256": "3952f53b9843129a746e4e31ed39ada60dbf0000d7bbe84c82edbdc633b9e16b",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/logging/memory-logs.test.ts",
+      "sha256": "7aa31a9ff47a7a0c0d2a68995da0f69d1ae09bcef0805b8f53a19da05c02ef2e",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/logging/query.test.ts",
+      "sha256": "0f1e76461f3e6977b680d61cf3986bf02ea9bcf1b3142840df18e03e61659d25",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/logging/redaction.test.ts",
+      "sha256": "8c44fb0ad71fb11c8d58442f424449f6f9cfc864458446c0c7119a1b861464d8",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/logging/schema.test.ts",
+      "sha256": "3638676d8d82a323eebbb2481b8706f098536799b0780f07a771cdc83821d5a9",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/logging/types-json.test.ts",
+      "sha256": "664eb7144c99bae123551fef2db367ff82e16a6426b334253f7bb8cd280500eb",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/testing/conformance.test.ts",
+      "sha256": "b3e0f13072877de447f6337b7ea9efc14ba41013e7a1d4d3c606b40a8cd72e54",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/testing/expect.test.ts",
+      "sha256": "cbe630db6313b46ed476ed4b4af20632c225fa3ba64b6e940ffa47d748386235",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/testing/runner.test.ts",
+      "sha256": "a6fe2ba39234699b29a5b1e6e95f228e9cb2f79ee19c63d6a5db67a28d3d82b2",
+      "generated": false
+    },
+    {
+      "path": "typescript/test/tracing/adapters.test.ts",
+      "sha256": "16f689ae2f3e7e33475ec25aa264cc831ff0922e71dadc740df2394afcdb7255",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/tracing/helpers.test.ts",
+      "sha256": "ca2ec3aadecc6d01d9326856ba4f884d3960ea086e8c5dd8d8446a3ed033cbbf",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/tracing/init.test.ts",
+      "sha256": "c3e345b0ece7297ba7035f22d49818a2de885bfbd2dddd5a10508bfc39f3cc3b",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/tracing/memory-conformance.test.ts",
+      "sha256": "688ff5e2adbe84bbba21be0a5795ee9d59670eadebd6b135e4ef084d8b42c538",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/tracing/model.test.ts",
+      "sha256": "155648d79c9465d84b46af6dfa3426bce373899b9b31c9d365c6915e98d5332c",
+      "generated": true
+    },
+    {
+      "path": "typescript/test/tracing/schema.test.ts",
+      "sha256": "7f5859703275eef5bdecaf4067b9b27a4dd1de590f8a8118acdda0ac63414627",
+      "generated": true
+    },
+    {
+      "path": "typescript/tsconfig.json",
+      "sha256": "709f99522a3330d20362173e1beae793009ec05e0a5be4715071794376bb738f",
+      "generated": false
+    },
+    {
+      "path": "typescript/tsup.config.ts",
+      "sha256": "9a086b7b970de220f1604f52c2ecd1b5a9ee66d053fff28a5b734d50f43dfd2a",
+      "generated": false
+    },
+    {
+      "path": "typescript/typedoc.json",
+      "sha256": "5d7403c8cbbeeebe321e7146409f8eff2c5ccd5f4479991e90f5bd844fb51883",
+      "generated": false
+    },
+    {
+      "path": "typescript/vitest.config.ts",
+      "sha256": "343308680b40890a23a58cf621145ee788fa613b23f3dec3a02e565cd47b0b8f",
+      "generated": false
+    }
+  ]
+}
