@@ -1,0 +1,10 @@
+{
+  "status": "error",
+  "error": {
+    "type": "unauthenticated",
+    "code": "unauthenticated",
+    "message": "unauthenticated",
+    "errors": [],
+    "suggestions": []
+  }
+}

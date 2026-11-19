@@ -14,6 +14,7 @@ import codes.grow.packages.signoz.core.MockServer;
 import codes.grow.packages.signoz.core.RetryPolicy;
 import codes.grow.packages.signoz.core.Secret;
 import codes.grow.packages.signoz.core.TlsOptions;
+import codes.grow.packages.signoz.core.UnavailableException;
 import codes.grow.packages.signoz.core.UnsupportedException;
 import java.net.ServerSocket;
 import java.time.Duration;
@@ -46,7 +47,7 @@ class SignozClientTest {
   private SignozClient client() {
     return SignozClient.builder()
         .url(server.url())
-        .token("tok-123456")
+        .apiKey("tok-123456")
         .retry(RetryPolicy.builder().initialBackoff(Duration.ofMillis(1)).build())
         .build();
   }
@@ -72,7 +73,7 @@ class SignozClientTest {
       assertThat(c.health().status()).isEqualTo("ok");
       assertThat(c.healthAsync().join().details()).containsEntry("status", "5");
       assertThat(server.requests()).hasSize(6);
-      assertThat(server.requests().get(0).uri()).isEqualTo("/health");
+      assertThat(server.requests().get(0).uri()).isEqualTo("/api/v1/health?live=1");
     }
   }
 
@@ -100,15 +101,18 @@ class SignozClientTest {
   }
 
   @Test
-  void pingSendsBearerToken() {
+  void pingSendsApiKey() {
     server
         .enqueue(200, "{}")
         .enqueue(401, "{\"message\":\"bad token tok-123456\"}")
         .enqueue(200, "{}");
     try (var c = client()) {
       assertThat(c.ping()).isPositive();
-      assertThat(server.requests().get(0).header("Authorization")).isEqualTo("Bearer tok-123456");
-      assertThat(server.requests().get(0).uri()).isEqualTo("/v1/ping");
+      assertThat(server.requests().get(0).header("SIGNOZ-API-KEY")).isEqualTo("tok-123456");
+      assertThat(server.requests().get(0).uri())
+          .startsWith("/api/v1/fields/keys?")
+          .contains("signal=logs")
+          .contains("limit=1");
       assertThatThrownBy(c::ping)
           .isInstanceOf(AuthenticationException.class)
           .message()
@@ -118,11 +122,11 @@ class SignozClientTest {
   }
 
   @Test
-  void pingWithoutToken() {
+  void pingWithoutApiKey() {
     server.enqueue(200, "{}");
     try (var c = SignozClient.builder().url(server.url()).build()) {
       c.ping();
-      assertThat(server.requests().get(0).header("Authorization")).isNull();
+      assertThat(server.requests().get(0).header("SIGNOZ-API-KEY")).isNull();
     }
   }
 
@@ -132,12 +136,31 @@ class SignozClientTest {
         .enqueue(200, "{\"version\":\"1.2.3\"}")
         .enqueue(404, "")
         .enqueue(200, "{\"other\":1}")
-        .enqueue(200, "{\"version\":\"2.0.0\"}");
-    try (var c = client()) {
+        .enqueue(200, "{\"version\":\"v2.0.0\"}")
+        .enqueue(200, "{\"version\":\"\",\"ee\":\"Y\"}")
+        .enqueue(200, "<!doctype html><html></html>", "Content-Type", "text/html")
+        .enqueue(500, "{}")
+        .enqueue(200, "not json", "Content-Type", "text/plain");
+    try (var c =
+        SignozClient.builder()
+            .url(server.url())
+            .apiKey("tok-123456")
+            .retry(RetryPolicy.none())
+            .build()) {
       assertThat(c.serverVersion()).isEqualTo("1.2.3");
       assertThatThrownBy(c::serverVersion).isInstanceOf(UnsupportedException.class);
       assertThatThrownBy(c::serverVersion).isInstanceOf(UnsupportedException.class);
       assertThat(c.serverVersionAsync().join()).isEqualTo("2.0.0");
+      assertThatThrownBy(c::serverVersion)
+          .isInstanceOf(UnsupportedException.class)
+          .hasMessageContaining("does not report");
+      assertThatThrownBy(c::serverVersion)
+          .isInstanceOf(UnsupportedException.class)
+          .hasMessageContaining("not available");
+      assertThatThrownBy(c::serverVersion).isInstanceOf(UnavailableException.class);
+      assertThatThrownBy(c::serverVersion).isInstanceOf(UnavailableException.class);
+      assertThat(server.requests().get(0).uri()).isEqualTo("/api/v1/version");
+      assertThat(server.requests().get(0).header("SIGNOZ-API-KEY")).isNull();
     }
   }
 
@@ -165,7 +188,7 @@ class SignozClientTest {
     try (var c =
         SignozClient.builder()
             .url(server.url())
-            .token(Secret.of("s3cr3t-value"))
+            .apiKey(Secret.of("s3cr3t-value"))
             .connectTimeout(Duration.ofSeconds(1))
             .requestTimeout(Duration.ofSeconds(2))
             .totalTimeout(Duration.ofSeconds(3))
@@ -179,7 +202,7 @@ class SignozClientTest {
             .build()) {
       SignozConfig cfg = c.config();
       assertThat(cfg.url()).isEqualTo(server.url());
-      assertThat(cfg.token()).isPresent();
+      assertThat(cfg.apiKey()).isPresent();
       assertThat(cfg.connectTimeout()).isEqualTo(Duration.ofSeconds(1));
       assertThat(cfg.requestTimeout()).isEqualTo(Duration.ofSeconds(2));
       assertThat(cfg.totalTimeout()).isEqualTo(Duration.ofSeconds(3));
@@ -192,7 +215,7 @@ class SignozClientTest {
       assertThat(cfg.logger()).isSameAs(logger);
       assertThat(c.toString()).doesNotContain("s3cr3t-value");
       assertThat(c.transport().config().knownSecrets()).containsExactly("s3cr3t-value");
-      cfg.token().get().clear();
+      cfg.apiKey().get().clear();
       assertThat(c.transport().config().knownSecrets()).isEmpty();
     }
   }
@@ -202,7 +225,7 @@ class SignozClientTest {
     SignozConfig cfg =
         cfg()
             .url("http://user:pw@h:1")
-            .token("tok-very-secret")
+            .apiKey("tok-very-secret")
             .header("Authorization", "Bearer tok-very-secret")
             .proxy("http://u:proxypass@p:3128")
             .build();
@@ -210,15 +233,15 @@ class SignozClientTest {
         .doesNotContain("tok-very-secret")
         .doesNotContain("proxypass")
         .doesNotContain(":pw@")
-        .contains("token=[REDACTED]");
-    assertThat(cfg().build().toString()).contains("token=null").contains("proxy=null");
+        .contains("apiKey=[REDACTED]");
+    assertThat(cfg().build().toString()).contains("apiKey=null").contains("proxy=null");
   }
 
   @Test
   void core_config_env_precedence() {
     Map<String, String> env = new HashMap<>();
     env.put(P + "URL", "http://from-env:1");
-    env.put(P + "TOKEN", "env-token");
+    env.put(P + "API_KEY", "env-token");
     env.put(P + "CONNECT_TIMEOUT", "1500");
     env.put(P + "REQUEST_TIMEOUT", "2s");
     env.put(P + "TOTAL_TIMEOUT", "1m");
@@ -230,7 +253,7 @@ class SignozClientTest {
     env.put(P + "PROXY", "http://proxy:1");
     SignozConfig fromEnv = SignozConfig.fromEnv(env);
     assertThat(fromEnv.url()).isEqualTo("http://from-env:1");
-    assertThat(fromEnv.token().map(Secret::reveal)).contains("env-token");
+    assertThat(fromEnv.apiKey().map(Secret::reveal)).contains("env-token");
     assertThat(fromEnv.connectTimeout()).isEqualTo(Duration.ofMillis(1500));
     assertThat(fromEnv.requestTimeout()).isEqualTo(Duration.ofSeconds(2));
     assertThat(fromEnv.totalTimeout()).isEqualTo(Duration.ofMinutes(1));
@@ -242,7 +265,7 @@ class SignozClientTest {
     SignozConfig explicit =
         cfg()
             .url("http://explicit:2")
-            .token("explicit-token")
+            .apiKey("explicit-token")
             .connectTimeout(Duration.ofSeconds(9))
             .requestTimeout(Duration.ofSeconds(9))
             .totalTimeout(Duration.ofSeconds(9))
@@ -252,14 +275,14 @@ class SignozClientTest {
             .fromEnv(EnvReader.of(env))
             .build();
     assertThat(explicit.url()).isEqualTo("http://explicit:2");
-    assertThat(explicit.token().map(Secret::reveal)).contains("explicit-token");
+    assertThat(explicit.apiKey().map(Secret::reveal)).contains("explicit-token");
     assertThat(explicit.retry().maxRetries()).isZero();
     assertThat(explicit.tls().insecureSkipVerify()).isFalse();
     assertThat(explicit.proxy()).contains("http://p2:1");
     // defaults when nothing is set
     SignozConfig defaults = SignozConfig.fromEnv(Map.of());
     assertThat(defaults.url()).isEqualTo(SignozConfig.DEFAULT_URL);
-    assertThat(defaults.token()).isEmpty();
+    assertThat(defaults.apiKey()).isEmpty();
     assertThat(defaults.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
     assertThat(defaults.requestTimeout()).isEqualTo(Duration.ofSeconds(30));
     assertThat(defaults.totalTimeout()).isEqualTo(Duration.ofSeconds(120));
@@ -293,7 +316,7 @@ class SignozClientTest {
         .isInstanceOf(ConfigException.class);
     assertThatThrownBy(() -> cfg().proxy("relative").build()).isInstanceOf(ConfigException.class);
     assertThatThrownBy(() -> cfg().proxy("http://[").build()).isInstanceOf(ConfigException.class);
-    assertThat(cfg().token((String) null).build().token()).isEmpty();
+    assertThat(cfg().apiKey((String) null).build().apiKey()).isEmpty();
   }
 
   @Test

@@ -16,7 +16,7 @@ public final class BasicExample {
    * @param args unused
    */
   public static void main(String[] args) {
-    // Reads GROW_SIGNOZ_URL, GROW_SIGNOZ_TOKEN, timeouts, TLS and proxy settings.
+    // Reads GROW_SIGNOZ_URL, GROW_SIGNOZ_API_KEY, GROW_SIGNOZ_OTLP_ENDPOINT, timeouts, TLS and proxy settings.
     try (var client = SignozClient.fromEnv()) {
       HealthStatus health = client.health(); // never throws for an unreachable service
       System.out.println("health: " + health);
@@ -26,7 +26,7 @@ public final class BasicExample {
       try {
         System.out.println("ping: " + client.ping().toMillis() + " ms");
       } catch (AuthenticationException e) {
-        // messages never contain the token
+        // messages never contain the API key
         System.out.println("bad credentials: " + e.getMessage());
       }
       try {
