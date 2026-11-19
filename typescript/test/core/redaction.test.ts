@@ -61,6 +61,12 @@ describe("redaction", () => {
     expect(isSensitiveField("name")).toBe(false);
     expect(isSensitiveField("pin", ["PIN"])).toBe(true);
     expect(isSensitiveField("pin", [""])).toBe(false);
+    // names ending in "path" are locations, not credentials (extraKeys still apply)
+    expect(isSensitiveField("secretPath")).toBe(false);
+    expect(isSensitiveField("secret_path")).toBe(false);
+    expect(isSensitiveField("token-path")).toBe(false);
+    expect(isSensitiveField("secret_path", ["secret_path"])).toBe(true);
+    expect(isSensitiveField("secret_paths")).toBe(true);
   });
 
   it("redacts URLs: query values and user info", () => {

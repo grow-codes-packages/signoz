@@ -1,7 +1,7 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "name": "@grow-codes/signoz",
-  "entryPoints": ["src/index.ts", "src/testing/index.ts"],
+  "entryPoints": ["src/index.ts", "src/testing-entry.ts"],
   "out": "docs/api",
   "excludePrivate": true,
   "excludeInternal": true,

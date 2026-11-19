@@ -75,7 +75,8 @@ def test_logs_http_and_grpc_round_trip(client: sdk.SignozClient) -> None:
         assert logs.stats().failed == 0
         flt = sdk.FilterBuilder().eq("service.name", service).eq("run", RUN)
         page = poll(
-            lambda: client.query.query_logs(flt, order_by="asc"), lambda p: len(p.records) >= 2
+            lambda flt=flt: client.query.query_logs(flt, order_by="asc"),
+            lambda p: len(p.records) >= 2,
         )
         assert len(page.records) == 2, page
         rec = next(r for r in page.records if r.severity == sdk.Severity.ERROR)

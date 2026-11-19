@@ -45,5 +45,5 @@ Start with [Install](install.md) and the [Quickstart](quickstart.md).
 
 !!! note "Independent project"
     This SDK is made by [Grow Codes](https://grow.codes). SigNoz is a trademark of
-    SigNoz, Inc.. This project is not affiliated with or endorsed by SigNoz, Inc.. See
+    its owner (SigNoz, Inc.); this project is not affiliated with or endorsed by it. See
     [License & disclaimer](license.md).

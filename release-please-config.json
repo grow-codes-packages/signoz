@@ -22,7 +22,8 @@
       "release-type": "node",
       "component": "typescript",
       "package-name": "@grow-codes/signoz",
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "extra-files": ["src/core/version.ts"]
     },
     "rust": {
       "release-type": "rust",
@@ -36,19 +37,23 @@
       "package-name": "github.com/grow-codes-packages/signoz/go",
       "tag-separator": "/",
       "include-v-in-tag": true,
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "extra-files": ["version.go"]
     },
     "python": {
       "release-type": "python",
       "component": "python",
       "package-name": "grow-signoz",
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "extra-files": ["src/grow_signoz/_version.py"]
     },
     "java": {
-      "release-type": "maven",
+      "release-type": "java",
       "component": "java",
       "package-name": "codes.grow.packages:signoz",
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "extra-files": ["pom.xml"],
+      "skip-snapshot": true
     }
   }
 }
