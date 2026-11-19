@@ -1,10 +1,17 @@
 package signoz
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -12,7 +19,7 @@ import (
 // newTestClient builds a client for url with fast retries; mutate adjusts the config.
 func newTestClient(t *testing.T, url string, mutate func(*Config)) *Client {
 	t.Helper()
-	cfg := Config{CommonConfig: CommonConfig{URL: url, Retry: fastRetry(3)}, Token: NewSecret(testToken)}
+	cfg := Config{CommonConfig: CommonConfig{URL: url, Retry: fastRetry(3)}, APIKey: NewSecret(testToken)}
 	if mutate != nil {
 		mutate(&cfg)
 	}
@@ -24,158 +31,323 @@ func newTestClient(t *testing.T, url string, mutate func(*Config)) *Client {
 	return c
 }
 
-func TestClientConfig(t *testing.T) {
-	t.Run("core.config.env-precedence", func(t *testing.T) {
-		saved, savedTok := vendorEnv, vendorTokenEnv
-		t.Cleanup(func() { vendorEnv, vendorTokenEnv = saved, savedTok })
-		vendorEnv = VendorEnv{URL: []string{"VENDOR_ADDR"}}
-		vendorTokenEnv = []string{"VENDOR_TOKEN"}
+// fixture reads testdata/<name> (responses recorded from the real stack).
+func fixture(t *testing.T, name string) []byte {
+	t.Helper()
+	b, err := os.ReadFile(filepath.Join("testdata", name))
+	if err != nil {
+		t.Fatalf("fixture %s: %v", name, err)
+	}
+	return b
+}
 
-		env := map[string]string{EnvPrefix + "URL": "http://grow:1", "VENDOR_ADDR": "http://vendor:2", "VENDOR_TOKEN": "vendor-token"}
+// recorded is a request seen by the mock server.
+type recorded struct {
+	Method, Path, Query string
+	Header              http.Header
+	Body                []byte
+}
+
+// mockSignoz serves routes keyed by "METHOD /path" and records every request.
+type mockSignoz struct {
+	*httptest.Server
+	mu     sync.Mutex
+	routes map[string]http.HandlerFunc
+	reqs   []recorded
+}
+
+func newMock(t *testing.T) *mockSignoz {
+	t.Helper()
+	m := &mockSignoz{routes: map[string]http.HandlerFunc{}}
+	m.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		m.mu.Lock()
+		m.reqs = append(m.reqs, recorded{Method: r.Method, Path: r.URL.Path, Query: r.URL.RawQuery, Header: r.Header.Clone(), Body: body})
+		h, ok := m.routes[r.Method+" "+r.URL.Path]
+		m.mu.Unlock()
+		if !ok {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			_, _ = w.Write([]byte("<!doctype html><html></html>"))
+			return
+		}
+		r.Body = io.NopCloser(strings.NewReader(string(body)))
+		h(w, r)
+	}))
+	t.Cleanup(m.Close)
+	return m
+}
+
+func (m *mockSignoz) on(route string, h http.HandlerFunc) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.routes[route] = h
+}
+
+func (m *mockSignoz) json(route string, status int, body []byte) {
+	m.on(route, func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+		_, _ = w.Write(body)
+	})
+}
+
+func (m *mockSignoz) requests() []recorded {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return append([]recorded(nil), m.reqs...)
+}
+
+func (m *mockSignoz) last(t *testing.T) recorded {
+	t.Helper()
+	r := m.requests()
+	if len(r) == 0 {
+		t.Fatal("no request recorded")
+	}
+	return r[len(r)-1]
+}
+
+// queryBody decodes the last query_range request.
+func queryBody(t *testing.T, r recorded) map[string]any {
+	t.Helper()
+	var m map[string]any
+	if err := json.Unmarshal(r.Body, &m); err != nil {
+		t.Fatalf("body %s: %v", r.Body, err)
+	}
+	return m
+}
+
+func specOf(t *testing.T, body map[string]any) map[string]any {
+	t.Helper()
+	q := body["compositeQuery"].(map[string]any)["queries"].([]any)[0].(map[string]any)
+	return q["spec"].(map[string]any)
+}
+
+func TestConfig(t *testing.T) {
+	t.Run("core.config.env-precedence", func(t *testing.T) {
+		env := map[string]string{
+			EnvPrefix + "URL": "http://grow:1", "SIGNOZ_URL": "http://vendor:2",
+			"SIGNOZ_API_KEY": "vendor-key-1", "SIGNOZ_INGESTION_KEY": "ingest-key-1",
+			"SIGNOZ_OTLP_ENDPOINT": "http://collector:4318", "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel:4318",
+		}
 		cfg, err := ConfigFromEnvWith(Config{}, env)
-		if err != nil || cfg.URL != "http://grow:1" || cfg.Token.Reveal() != "vendor-token" {
+		if err != nil || cfg.URL != "http://grow:1" || cfg.APIKey.Reveal() != "vendor-key-1" ||
+			cfg.IngestionKey.Reveal() != "ingest-key-1" || cfg.OTLPEndpoint != "http://collector:4318" ||
+			cfg.OTLPProtocol != ProtocolHTTPProtobuf {
 			t.Fatalf("env: %v %s", err, cfg)
 		}
-		env[EnvPrefix+"TOKEN"] = "grow-token"
+		env[EnvPrefix+"API_KEY"] = "grow-key-1"
+		env[EnvPrefix+"INGESTION_KEY"] = "grow-ingest-1"
+		env[EnvPrefix+"OTLP_ENDPOINT"] = "http://grow-collector:4317"
+		env[EnvPrefix+"OTLP_PROTOCOL"] = "GRPC"
 		cfg, _ = ConfigFromEnvWith(Config{}, env)
-		if cfg.Token.Reveal() != "grow-token" {
-			t.Fatal("GROW_* token must beat the vendor variable")
+		if cfg.APIKey.Reveal() != "grow-key-1" || cfg.IngestionKey.Reveal() != "grow-ingest-1" ||
+			cfg.OTLPEndpoint != "http://grow-collector:4317" || cfg.OTLPProtocol != ProtocolGRPC {
+			t.Fatalf("GROW_* must beat vendor variables: %s", cfg)
 		}
-		cfg, _ = ConfigFromEnvWith(Config{CommonConfig: CommonConfig{URL: "https://explicit"}, Token: NewSecret("explicit")}, env)
-		if cfg.URL != "https://explicit" || cfg.Token.Reveal() != "explicit" {
+		cfg, _ = ConfigFromEnvWith(Config{CommonConfig: CommonConfig{URL: "https://explicit"}, APIKey: NewSecret("explicit-key")}, env)
+		if cfg.URL != "https://explicit" || cfg.APIKey.Reveal() != "explicit-key" {
 			t.Fatal("explicit must win")
 		}
+		delete(env, "SIGNOZ_OTLP_ENDPOINT")
+		delete(env, EnvPrefix+"OTLP_ENDPOINT")
+		cfg, _ = ConfigFromEnvWith(Config{}, env)
+		if cfg.OTLPEndpoint != "http://otel:4318" {
+			t.Fatalf("OTEL_EXPORTER_OTLP_ENDPOINT fallback: %s", cfg.OTLPEndpoint)
+		}
+		cfg, _ = ConfigFromEnvWith(Config{}, map[string]string{"OTEL_EXPORTER_OTLP_PROTOCOL": "grpc"})
+		if cfg.OTLPProtocol != ProtocolGRPC || cfg.OTLPEndpoint != DefaultOTLPGRPCEndpoint {
+			t.Fatalf("grpc default: %s", cfg)
+		}
 		cfg, _ = ConfigFromEnvWith(Config{}, map[string]string{})
-		if cfg.URL != DefaultURL || cfg.RequestTimeout != DefaultRequestTimeout {
+		if cfg.URL != DefaultURL || cfg.OTLPEndpoint != DefaultOTLPHTTPEndpoint || cfg.RequestTimeout != DefaultRequestTimeout || !cfg.APIKey.IsZero() {
 			t.Fatalf("defaults: %s", cfg)
-		}
-		_, err = ConfigFromEnvWith(Config{}, map[string]string{EnvPrefix + "TOTAL_TIMEOUT": "forever-xyz"})
-		if !errors.Is(err, ErrConfig) || !strings.Contains(err.Error(), EnvPrefix+"TOTAL_TIMEOUT") || strings.Contains(err.Error(), "forever-xyz") {
-			t.Fatalf("invalid value: %v", err)
-		}
-		if _, err := ConfigFromEnvWith(Config{}, map[string]string{EnvPrefix + "URL": "ftp://nope"}); !errors.Is(err, ErrConfig) {
-			t.Fatalf("invalid url: %v", err)
 		}
 		t.Setenv(EnvPrefix+"URL", "http://process-env:9")
 		if cfg, err := ConfigFromEnv(); err != nil || cfg.URL != "http://process-env:9" {
-			t.Fatalf("process env: %v %s", err, cfg.URL)
+			t.Fatalf("process env: %v %s", err, cfg)
 		}
 	})
-
-	t.Run("core.redaction.config", func(t *testing.T) {
-		cfg := Config{
-			CommonConfig: CommonConfig{URL: "https://h", Headers: map[string]string{"X-Api-Key": "hdr-xyz"}},
-			Token:        NewSecret("tok-xyz"),
+	t.Run("core.config.invalid", func(t *testing.T) {
+		bad := []map[string]string{
+			{EnvPrefix + "TOTAL_TIMEOUT": "forever-xyz"},
+			{EnvPrefix + "URL": "ftp://nope"},
+			{EnvPrefix + "OTLP_PROTOCOL": "thrift"},
+			{EnvPrefix + "OTLP_ENDPOINT": "collector:4318"},
 		}
-		forms := fmt.Sprintf("%v|%+v|%#v|%s", cfg, cfg, cfg, cfg.String())
-		if strings.Contains(forms, "tok-xyz") || strings.Contains(forms, "hdr-xyz") || !strings.Contains(forms, "Token:"+Redacted) {
-			t.Fatalf("forms: %s", forms)
+		for _, env := range bad {
+			_, err := ConfigFromEnvWith(Config{}, env)
+			if !errors.Is(err, ErrConfig) {
+				t.Errorf("%v: %v", env, err)
+			}
+			for _, v := range env {
+				if strings.Contains(fmt.Sprint(err), v) && v != "thrift" {
+					t.Errorf("error leaks value: %v", err)
+				}
+			}
 		}
-	})
-
-	t.Run("invalid config", func(t *testing.T) {
-		if _, err := NewClient(Config{CommonConfig: CommonConfig{URL: "mailto:x"}}); !errors.Is(err, ErrConfig) {
+		if _, err := NewClient(Config{CommonConfig: CommonConfig{URL: "nope"}}); !errors.Is(err, ErrConfig) {
 			t.Fatalf("NewClient: %v", err)
 		}
-		if _, err := NewClient(Config{CommonConfig: CommonConfig{TLS: TLSConfig{CACertPEM: "bad"}}}); !errors.Is(err, ErrConfig) {
-			t.Fatalf("bad TLS: %v", err)
+		if _, err := NewClientFromEnv(); err != nil {
+			t.Fatalf("NewClientFromEnv with defaults: %v", err)
 		}
-	})
-}
-
-func TestClient(t *testing.T) {
-	ts := newTestServer(t, func(w http.ResponseWriter, r *http.Request, _ int) {
-		switch r.URL.Path {
-		case "/health":
-			_, _ = w.Write([]byte(`{"status":"ok"}`))
-		case "/version":
-			_, _ = w.Write([]byte(`{"version":"9.9.9"}`))
-		case "/v1/ping":
-			if r.Header.Get("Authorization") != "Bearer "+testToken {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-			_, _ = w.Write([]byte(`{}`))
-		default:
-			w.WriteHeader(http.StatusNotFound)
-		}
-	})
-
-	t.Run("health ping version", func(t *testing.T) {
-		c := newTestClient(t, ts.URL, nil)
-		if hs, err := c.Health(t.Context()); err != nil || !hs.Healthy || hs.Status != "ok" {
-			t.Fatalf("health %+v %v", hs, err)
-		}
-		if d, err := c.Ping(t.Context()); err != nil || d <= 0 {
-			t.Fatalf("ping %s %v", d, err)
-		}
-		if v, err := c.ServerVersion(t.Context()); err != nil || v != "9.9.9" {
-			t.Fatalf("version %q %v", v, err)
-		}
-		if c.Config().URL != ts.URL {
-			t.Fatal("Config()")
-		}
-	})
-
-	t.Run("authentication errors", func(t *testing.T) {
-		bad := newTestClient(t, ts.URL, func(cfg *Config) { cfg.Token = NewSecret("wrong-token") })
-		if _, err := bad.Ping(t.Context()); !errors.Is(err, ErrAuthentication) {
-			t.Fatalf("bad token: %v", err)
-		}
-		none := newTestClient(t, ts.URL, func(cfg *Config) { cfg.Token = Secret{} })
-		if _, err := none.Ping(t.Context()); !errors.Is(err, ErrAuthentication) {
-			t.Fatalf("no token: %v", err)
-		}
-	})
-
-	t.Run("server version errors", func(t *testing.T) {
-		ts404 := newTestServer(t, status(http.StatusNotFound))
-		if _, err := newTestClient(t, ts404.URL, nil).ServerVersion(t.Context()); !errors.Is(err, ErrUnsupported) {
-			t.Fatalf("no version endpoint: %v", err)
-		}
-		ts500 := newTestServer(t, status(http.StatusInternalServerError))
-		c := newTestClient(t, ts500.URL, func(cfg *Config) { cfg.Retry = fastRetry(0) })
-		if _, err := c.ServerVersion(t.Context()); !errors.Is(err, ErrUnavailable) {
-			t.Fatalf("version 500: %v", err)
-		}
-		tsBad := newTestServer(t, func(w http.ResponseWriter, _ *http.Request, _ int) { _, _ = w.Write([]byte("nope")) })
-		if _, err := newTestClient(t, tsBad.URL, nil).ServerVersion(t.Context()); !errors.Is(err, ErrUnavailable) {
-			t.Fatalf("version decode: %v", err)
-		}
-	})
-
-	t.Run("core.close.idempotent", func(t *testing.T) {
-		c := newTestClient(t, ts.URL, nil)
-		first, second := c.Close(), c.Close()
-		if first != nil || second != nil {
-			t.Fatal("close")
-		}
-		if _, err := c.Ping(t.Context()); !errors.Is(err, ErrCancelled) {
-			t.Fatalf("after close: %v", err)
-		}
-	})
-
-	t.Run("core.health.unreachable", func(t *testing.T) {
-		c := newTestClient(t, "http://"+closedAddr(t), func(cfg *Config) { cfg.ConnectTimeout = time.Second })
-		if hs, err := c.Health(t.Context()); err != nil || hs.Healthy || hs.Status != "unreachable" {
-			t.Fatalf("hs=%+v err=%v", hs, err)
-		}
-	})
-
-	t.Run("from env", func(t *testing.T) {
-		t.Setenv(EnvPrefix+"URL", ts.URL)
-		t.Setenv(EnvPrefix+"TOKEN", testToken)
-		c, err := NewClientFromEnv()
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer func() { _ = c.Close() }()
-		if _, err := c.Ping(t.Context()); err != nil {
-			t.Fatal(err)
-		}
-		t.Setenv(EnvPrefix+"URL", "mailto:x")
+		t.Setenv(EnvPrefix+"URL", "::bad")
 		if _, err := NewClientFromEnv(); !errors.Is(err, ErrConfig) {
-			t.Fatalf("bad env: %v", err)
+			t.Fatalf("NewClientFromEnv: %v", err)
+		}
+	})
+	t.Run("core.redaction.config-string", func(t *testing.T) {
+		cfg := Config{APIKey: NewSecret("api-SECRET-1"), IngestionKey: NewSecret("ing-SECRET-2"),
+			CommonConfig: CommonConfig{Headers: map[string]string{"X-Token": "hdr-SECRET-3"}}}
+		for _, s := range []string{cfg.String(), cfg.GoString(), fmt.Sprintf("%v %+v %#v", cfg, cfg, cfg)} {
+			if strings.Contains(s, "SECRET") || !strings.Contains(s, Redacted) {
+				t.Fatalf("leak: %s", s)
+			}
 		}
 	})
 }
+
+func TestClientCore(t *testing.T) {
+	m := newMock(t)
+	m.json("GET /api/v1/health", 200, fixture(t, "health.ok.json"))
+	m.json("GET /api/v1/fields/keys", 200, fixture(t, "listLogFields.search.json"))
+	m.json("GET /api/v1/version", 200, fixture(t, "serverVersion.ok.json"))
+	c := newTestClient(t, m.URL, nil)
+	ctx := t.Context()
+
+	t.Run("health", func(t *testing.T) {
+		h, err := c.Health(ctx)
+		if err != nil || !h.Healthy || h.Status != "ok" {
+			t.Fatalf("%v %+v", err, h)
+		}
+		if r := m.last(t); r.Query != "live=1" || r.Header.Get(APIKeyHeader) != "" {
+			t.Fatalf("health request %+v", r)
+		}
+		m.json("GET /api/v1/health", 503, []byte(`{"status":"down"}`))
+		h, _ = c.Health(ctx)
+		if h.Healthy || h.Status != "down" {
+			t.Fatalf("unhealthy: %+v", h)
+		}
+		m.json("GET /api/v1/health", 200, fixture(t, "health.ok.json"))
+		dead := newTestClient(t, "http://127.0.0.1:1", func(cfg *Config) { cfg.Retry = fastRetry(0) })
+		if h, err := dead.Health(ctx); err != nil || h.Status != "unreachable" {
+			t.Fatalf("unreachable: %v %+v", err, h)
+		}
+	})
+	t.Run("ping", func(t *testing.T) {
+		if d, err := c.Ping(ctx); err != nil || d <= 0 {
+			t.Fatalf("%v %v", err, d)
+		}
+		r := m.last(t)
+		if r.Header.Get(APIKeyHeader) != testToken || r.Query != "limit=1&signal=logs" || !strings.HasPrefix(r.Header.Get("User-Agent"), "grow-codes-signoz/") {
+			t.Fatalf("ping request %+v", r)
+		}
+		m.json("GET /api/v1/fields/keys", 401, fixture(t, "ping.unauthenticated.json"))
+		_, err := c.Ping(ctx)
+		if e := asError(t, err); e.Code != ErrorCodeAuthentication || e.HTTPStatus != 401 || strings.Contains(e.Message, testToken) {
+			t.Fatalf("401: %v", e)
+		}
+		m.on("GET /api/v1/fields/keys", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/html")
+			_, _ = w.Write([]byte("<!doctype html>"))
+		})
+		if _, err := c.Ping(ctx); !errors.Is(err, ErrUnsupported) {
+			t.Fatalf("html: %v", err)
+		}
+	})
+	t.Run("serverVersion", func(t *testing.T) {
+		if _, err := c.ServerVersion(ctx); !errors.Is(err, ErrUnsupported) {
+			t.Fatalf("empty version: %v", err)
+		}
+		m.json("GET /api/v1/version", 200, []byte(`{"version":"v0.150.0","ee":"Y"}`))
+		if v, err := c.ServerVersion(ctx); err != nil || v != "0.150.0" {
+			t.Fatalf("%v %q", err, v)
+		}
+		m.json("GET /api/v1/version", 200, []byte(`not json`))
+		if _, err := c.ServerVersion(ctx); !errors.Is(err, ErrUnavailable) {
+			t.Fatalf("bad json: %v", err)
+		}
+		m.json("GET /api/v1/version", 404, []byte(`{}`))
+		if _, err := c.ServerVersion(ctx); !errors.Is(err, ErrUnsupported) {
+			t.Fatalf("404: %v", err)
+		}
+		m.json("GET /api/v1/version", 403, fixture(t, "error.forbidden.json"))
+		if _, err := c.ServerVersion(ctx); !errors.Is(err, ErrPermissionDenied) {
+			t.Fatalf("403: %v", err)
+		}
+		m.on("GET /api/v1/version", func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte("<html>")) })
+		if _, err := c.ServerVersion(ctx); !errors.Is(err, ErrUnsupported) {
+			t.Fatalf("html: %v", err)
+		}
+	})
+	t.Run("accessors", func(t *testing.T) {
+		if c.Query() == nil || c.Logs() != LogQueryClient(c.Query()) || c.Traces() != TraceQueryClient(c.Query()) {
+			t.Fatal("accessors")
+		}
+		if c.Config().OTLPEndpoint != DefaultOTLPHTTPEndpoint || c.Config().APIKey.Reveal() != testToken {
+			t.Fatalf("config %s", c.Config())
+		}
+	})
+}
+
+func TestClientClose(t *testing.T) {
+	col := newCollector(t)
+	c := newTestClient(t, "http://127.0.0.1:1", func(cfg *Config) { cfg.OTLPEndpoint = col.URL })
+	lc, err := c.NewLogClient(LogOptions{ServiceName: "svc"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := c.InitTracing(t.Context(), TracingConfig{ServiceName: "svc", DisableSetGlobal: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	lc.Send(t.Context(), LogInput{Message: "closing"})
+	_, span := h.Tracer("t").Start(context.Background(), "op")
+	span.End()
+	if err := c.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Close(); err != nil {
+		t.Fatal("close twice", err)
+	}
+	if n := col.logCount(); n != 1 {
+		t.Fatalf("close must flush logs, got %d", n)
+	}
+	if col.traceCalls() == 0 {
+		t.Fatal("close must flush spans")
+	}
+	if _, err := c.NewLogClient(LogOptions{}); !errors.Is(err, ErrCancelled) {
+		t.Fatalf("after close: %v", err)
+	}
+	if _, err := c.InitTracing(t.Context(), TracingConfig{ServiceName: "svc", DisableSetGlobal: true}); !errors.Is(err, ErrCancelled) {
+		t.Fatalf("after close: %v", err)
+	}
+	if _, err := c.Ping(t.Context()); !errors.Is(err, ErrCancelled) {
+		t.Fatalf("ping after close: %v", err)
+	}
+	if _, err := c.InitTracing(t.Context(), TracingConfig{}); !errors.Is(err, ErrConfig) {
+		t.Fatalf("invalid tracing config: %v", err)
+	}
+	if _, err := c.NewLogClient(LogOptions{Endpoint: "nope"}); !errors.Is(err, ErrConfig) {
+		t.Fatalf("invalid log endpoint: %v", err)
+	}
+	if _, err := c.NewLogClient(LogOptions{LogClientOptions: LogClientOptions{Batch: BatchOptions{MaxBatchSize: -1}}}); !errors.Is(err, ErrConfig) && !errors.Is(err, ErrValidation) {
+		t.Fatalf("invalid batch options: %v", err)
+	}
+}
+
+func TestClientCloseReportsErrors(t *testing.T) {
+	c := newTestClient(t, "http://127.0.0.1:1", nil)
+	c.logs = append(c.logs, failingLogClient{})
+	if err := c.Close(); err == nil {
+		t.Fatal("expected the log client error")
+	}
+	if err := c.Close(); err == nil {
+		t.Fatal("second close returns the first result")
+	}
+	_ = time.Second
+}
+
+type failingLogClient struct{ LogClient }
+
+func (failingLogClient) Close(context.Context) error { return errors.New("boom") }

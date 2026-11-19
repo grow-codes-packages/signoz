@@ -1,0 +1,57 @@
+{
+  "status": "success",
+  "data": {
+    "type": "scalar",
+    "meta": {
+      "rowsScanned": 6,
+      "bytesScanned": 543,
+      "durationMs": 10,
+      "stepIntervals": {
+        "A": 10
+      }
+    },
+    "data": {
+      "results": [
+        {
+          "queryName": "A",
+          "columns": [
+            {
+              "name": "name",
+              "signal": "",
+              "fieldContext": "",
+              "fieldDataType": "",
+              "queryName": "A",
+              "aggregationIndex": 0,
+              "meta": {},
+              "columnType": "group"
+            },
+            {
+              "name": "__result_0",
+              "signal": "",
+              "fieldContext": "",
+              "fieldDataType": "",
+              "queryName": "A",
+              "aggregationIndex": 0,
+              "meta": {},
+              "columnType": "aggregation"
+            },
+            {
+              "name": "__result_1",
+              "signal": "",
+              "fieldContext": "",
+              "fieldDataType": "",
+              "queryName": "A",
+              "aggregationIndex": 1,
+              "meta": {},
+              "columnType": "aggregation"
+            }
+          ],
+          "data": [
+            ["GET /verify", 1, 150000000],
+            ["db.query", 1, 100000000]
+          ]
+        }
+      ]
+    }
+  }
+}

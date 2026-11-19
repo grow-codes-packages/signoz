@@ -1,0 +1,16 @@
+{
+  "status": "success",
+  "data": {
+    "keys": {
+      "run.id": [
+        {
+          "name": "run.id",
+          "signal": "logs",
+          "fieldContext": "attribute",
+          "fieldDataType": "string"
+        }
+      ]
+    },
+    "complete": true
+  }
+}
