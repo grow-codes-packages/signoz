@@ -12,5 +12,6 @@ publish = false
 grow-signoz = { path = "..", features = ["testing", "blocking"] }
 tokio = { version = "1.43", features = ["rt-multi-thread", "macros", "time"] }
 serde_json = "1.0.120"
+opentelemetry = { version = "0.31", default-features = false, features = ["trace"] }
 
 [workspace]

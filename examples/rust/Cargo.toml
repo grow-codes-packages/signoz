@@ -9,5 +9,6 @@ publish = false
 [dependencies]
 grow-signoz = { path = "../../rust" }
 tokio = { version = "1.43", features = ["rt-multi-thread", "macros"] }
+opentelemetry = { version = "0.31", default-features = false, features = ["trace"] }
 
 [workspace]

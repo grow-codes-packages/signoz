@@ -1,0 +1,4 @@
+{
+  "code": 3,
+  "message": "ID.UnmarshalJSONIter: length mismatch, error found in #10 byte of ...|ceId\":\"zz\"}]}]}]}|..., bigger context ...|ogs\":[{\"scopeLogs\":[{\"logRecords\":[{\"traceId\":\"zz\"}]}]}]}|..."
+}
