@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -22,28 +23,54 @@ import java.util.Optional;
 /**
  * Immutable configuration of a {@link SignozClient} (SPEC section 2.2).
  *
- * <p>Build one with {@link #builder()} or read it from the environment with {@link #fromEnv()}.
- * Precedence: explicit builder value &gt; SDK variable ({@link EnvReader#DEFAULT_PREFIX} + name)
- * &gt; vendor variables &gt; default. {@link #toString()} never prints credentials.
+ * <p>Query calls ({@link SignozQueryClient}, {@link SignozClient#ping()}) go to {@link #url()} with
+ * the {@code SIGNOZ-API-KEY} header; ingest (log exporter, tracing) goes to the collector at {@link
+ * #otlpEndpoint()}. An ingest-only client needs no API key.
  *
- * <p>This file is owned by the service package (generated once by sdk-kit); add service fields
- * here.
+ * <p>Build one with {@link #builder()} or read it from the environment with {@link #fromEnv()}.
+ * Precedence: explicit builder value &gt; SDK variable ({@code GROW_SIGNOZ_<NAME>}) &gt; vendor
+ * variables ({@code SIGNOZ_URL}, {@code SIGNOZ_API_KEY}, {@code SIGNOZ_OTLP_ENDPOINT}, {@code
+ * OTEL_EXPORTER_OTLP_ENDPOINT}, {@code SIGNOZ_INGESTION_KEY}, {@code OTEL_EXPORTER_OTLP_PROTOCOL})
+ * &gt; default. {@link #toString()} never prints credentials.
  */
 public final class SignozConfig {
-  /** Default endpoint. */
+  /** Default query API endpoint (UI + API port 8080). */
   public static final String DEFAULT_URL = "http://127.0.0.1:8080";
 
+  /** Default OTLP/HTTP collector endpoint. */
+  public static final String DEFAULT_OTLP_HTTP_ENDPOINT = "http://127.0.0.1:4318";
+
+  /** Default OTLP/gRPC collector endpoint. */
+  public static final String DEFAULT_OTLP_GRPC_ENDPOINT = "http://127.0.0.1:4317";
+
+  /** Header carrying the service-account API key on query calls. */
+  public static final String API_KEY_HEADER = "SIGNOZ-API-KEY";
+
+  /** Header (gRPC metadata) carrying the SigNoz Cloud ingestion key on OTLP exports. */
+  public static final String INGESTION_KEY_HEADER = "signoz-ingestion-key";
+
   /** Vendor variables read for {@code url} after the SDK variable {@code URL}, in order. */
-  static final String[] URL_VENDOR_VARS = {};
+  static final String[] URL_VENDOR_VARS = {"SIGNOZ_URL"};
 
-  /** Vendor variables read for {@code token} after the SDK variable {@code TOKEN}, in order. */
-  static final String[] TOKEN_VENDOR_VARS = {};
+  /** Vendor variables read for {@code apiKey} after {@code API_KEY}, in order. */
+  static final String[] API_KEY_VENDOR_VARS = {"SIGNOZ_API_KEY"};
 
-  /** Vendor variables read for the CA bundle after the SDK variable {@code CA_CERT}. */
-  static final String[] CA_CERT_VENDOR_VARS = {};
+  /** Vendor variables read for {@code otlpEndpoint} after {@code OTLP_ENDPOINT}, in order. */
+  static final String[] OTLP_ENDPOINT_VENDOR_VARS = {
+    "SIGNOZ_OTLP_ENDPOINT", "OTEL_EXPORTER_OTLP_ENDPOINT"
+  };
+
+  /** Vendor variables read for {@code otlpProtocol} after {@code OTLP_PROTOCOL}, in order. */
+  static final String[] OTLP_PROTOCOL_VENDOR_VARS = {"OTEL_EXPORTER_OTLP_PROTOCOL"};
+
+  /** Vendor variables read for {@code ingestionKey} after {@code INGESTION_KEY}, in order. */
+  static final String[] INGESTION_KEY_VENDOR_VARS = {"SIGNOZ_INGESTION_KEY"};
 
   private final String url;
-  private final Secret token;
+  private final Secret apiKey;
+  private final String otlpEndpoint;
+  private final OtlpProtocol otlpProtocol;
+  private final Secret ingestionKey;
   private final Duration connectTimeout;
   private final Duration requestTimeout;
   private final Duration totalTimeout;
@@ -57,7 +84,11 @@ public final class SignozConfig {
 
   private SignozConfig(Builder b) {
     this.url = b.url != null ? b.url : DEFAULT_URL;
-    this.token = b.token;
+    this.apiKey = b.apiKey;
+    this.otlpProtocol = b.otlpProtocol != null ? b.otlpProtocol : OtlpProtocol.HTTP_PROTOBUF;
+    this.otlpEndpoint =
+        b.otlpEndpoint != null ? b.otlpEndpoint : defaultOtlpEndpoint(this.otlpProtocol);
+    this.ingestionKey = b.ingestionKey;
     this.connectTimeout = b.connectTimeout != null ? b.connectTimeout : Duration.ofSeconds(10);
     this.requestTimeout = b.requestTimeout != null ? b.requestTimeout : Duration.ofSeconds(30);
     this.totalTimeout = b.totalTimeout != null ? b.totalTimeout : Duration.ofSeconds(120);
@@ -71,12 +102,47 @@ public final class SignozConfig {
   }
 
   /**
+   * Returns the default collector endpoint of a protocol.
+   *
+   * @param protocol protocol
+   * @return {@link #DEFAULT_OTLP_GRPC_ENDPOINT} or {@link #DEFAULT_OTLP_HTTP_ENDPOINT}
+   */
+  public static String defaultOtlpEndpoint(OtlpProtocol protocol) {
+    return protocol == OtlpProtocol.GRPC ? DEFAULT_OTLP_GRPC_ENDPOINT : DEFAULT_OTLP_HTTP_ENDPOINT;
+  }
+
+  /**
    * Starts an empty builder (every field at its default).
    *
    * @return a new builder
    */
   public static Builder builder() {
     return new Builder();
+  }
+
+  /**
+   * Returns a builder with this configuration's values.
+   *
+   * @return a builder copy
+   */
+  public Builder toBuilder() {
+    Builder b = new Builder();
+    b.url = url;
+    b.apiKey = apiKey;
+    b.otlpEndpoint = otlpEndpoint;
+    b.otlpProtocol = otlpProtocol;
+    b.ingestionKey = ingestionKey;
+    b.connectTimeout = connectTimeout;
+    b.requestTimeout = requestTimeout;
+    b.totalTimeout = totalTimeout;
+    b.retry = retry;
+    b.tls = tls;
+    b.proxy = proxy;
+    b.headers.putAll(headers);
+    b.userAgentSuffix = userAgentSuffix;
+    b.hooks = hooks;
+    b.logger = logger;
+    return b;
   }
 
   /**
@@ -101,21 +167,13 @@ public final class SignozConfig {
   }
 
   /**
-   * Checks URL scheme, positive timeouts, retry limits and TLS pairs.
+   * Checks URL schemes, the OTLP endpoint, positive timeouts and TLS pairs.
    *
    * @throws ConfigException when a rule is violated
    */
   public void validate() {
-    URI u;
-    try {
-      u = new URI(url);
-    } catch (URISyntaxException e) {
-      throw new ConfigException("config: url is not a valid URL");
-    }
-    String scheme = u.getScheme() == null ? "" : u.getScheme().toLowerCase(Locale.ROOT);
-    if (!(scheme.equals("http") || scheme.equals("https")) || u.getHost() == null) {
-      throw new ConfigException("config: url must use http or https and include a host");
-    }
+    checkHttpUrl("url", url);
+    checkHttpUrl("otlpEndpoint", otlpEndpoint);
     requirePositive("connectTimeout", connectTimeout);
     requirePositive("requestTimeout", requestTimeout);
     requirePositive("totalTimeout", totalTimeout);
@@ -132,6 +190,19 @@ public final class SignozConfig {
     }
   }
 
+  private static void checkHttpUrl(String name, String value) {
+    URI u;
+    try {
+      u = new URI(value);
+    } catch (URISyntaxException e) {
+      throw new ConfigException("config: " + name + " is not a valid URL");
+    }
+    String scheme = u.getScheme() == null ? "" : u.getScheme().toLowerCase(Locale.ROOT);
+    if (!(scheme.equals("http") || scheme.equals("https")) || u.getHost() == null) {
+      throw new ConfigException("config: " + name + " must use http or https and include a host");
+    }
+  }
+
   private static void requirePositive(String name, Duration d) {
     if (d.isZero() || d.isNegative()) {
       throw new ConfigException("config: " + name + " must be positive");
@@ -139,29 +210,61 @@ public final class SignozConfig {
   }
 
   /**
-   * Translates the common fields into transport settings.
+   * Returns every credential value of this configuration (API key, ingestion key, sensitive
+   * headers), so error messages can redact them.
+   *
+   * @return secret values
+   */
+  public List<String> knownSecrets() {
+    List<String> out = new ArrayList<>();
+    for (Secret s : new Secret[] {apiKey, ingestionKey}) {
+      if (s != null && !s.isCleared() && !s.isEmpty()) {
+        out.add(s.reveal());
+      }
+    }
+    headers.forEach(
+        (k, v) -> {
+          if (Redaction.isSensitiveHeader(k) && v != null && !v.isEmpty()) {
+            out.add(v);
+          }
+        });
+    return out;
+  }
+
+  /**
+   * Translates the common fields into transport settings for the query API.
    *
    * @return the transport configuration
    */
   public TransportConfig toTransportConfig() {
-    return TransportConfig.builder(url)
+    return transportConfig(url, headers);
+  }
+
+  /**
+   * Transport settings for another base URL (the collector) with other headers.
+   *
+   * @param baseUrl base URL
+   * @param extraHeaders headers sent with every request
+   * @return the transport configuration
+   */
+  TransportConfig transportConfig(String baseUrl, Map<String, String> extraHeaders) {
+    return TransportConfig.builder(baseUrl)
         .connectTimeout(connectTimeout)
         .requestTimeout(requestTimeout)
         .totalTimeout(totalTimeout)
         .retry(retry)
         .tls(tls)
         .proxy(proxy)
-        .headers(headers)
+        .headers(extraHeaders)
         .userAgentSuffix(userAgentSuffix)
         .hooks(hooks)
         .logger(logger)
-        .knownSecrets(
-            () -> token == null || token.isCleared() ? List.of() : List.of(token.reveal()))
+        .knownSecrets(this::knownSecrets)
         .build();
   }
 
   /**
-   * Returns the endpoint base URL.
+   * Returns the query API base URL.
    *
    * @return the URL
    */
@@ -170,12 +273,39 @@ public final class SignozConfig {
   }
 
   /**
-   * Returns the API token.
+   * Returns the service-account API key sent as {@code SIGNOZ-API-KEY}.
    *
-   * @return the token, or empty
+   * @return the key, or empty
    */
-  public Optional<Secret> token() {
-    return Optional.ofNullable(token);
+  public Optional<Secret> apiKey() {
+    return Optional.ofNullable(apiKey);
+  }
+
+  /**
+   * Returns the collector endpoint (default by protocol: port 4318 for HTTP, 4317 for gRPC).
+   *
+   * @return the endpoint
+   */
+  public String otlpEndpoint() {
+    return otlpEndpoint;
+  }
+
+  /**
+   * Returns the OTLP protocol (default {@link OtlpProtocol#HTTP_PROTOBUF}).
+   *
+   * @return the protocol
+   */
+  public OtlpProtocol otlpProtocol() {
+    return otlpProtocol;
+  }
+
+  /**
+   * Returns the SigNoz Cloud ingestion key sent as {@code signoz-ingestion-key}.
+   *
+   * @return the key, or empty
+   */
+  public Optional<Secret> ingestionKey() {
+    return Optional.ofNullable(ingestionKey);
   }
 
   /**
@@ -272,8 +402,14 @@ public final class SignozConfig {
   public String toString() {
     return "SignozConfig{url="
         + Redaction.redactUrl(url)
-        + ", token="
-        + (token == null ? "null" : Redaction.REDACTED)
+        + ", apiKey="
+        + (apiKey == null ? "null" : Redaction.REDACTED)
+        + ", otlpEndpoint="
+        + Redaction.redactUrl(otlpEndpoint)
+        + ", otlpProtocol="
+        + otlpProtocol.wireValue()
+        + ", ingestionKey="
+        + (ingestionKey == null ? "null" : Redaction.REDACTED)
         + ", connectTimeout="
         + connectTimeout
         + ", requestTimeout="
@@ -301,7 +437,10 @@ public final class SignozConfig {
    */
   public static final class Builder {
     private String url;
-    private Secret token;
+    private Secret apiKey;
+    private String otlpEndpoint;
+    private OtlpProtocol otlpProtocol;
+    private Secret ingestionKey;
     private Duration connectTimeout;
     private Duration requestTimeout;
     private Duration totalTimeout;
@@ -326,8 +465,27 @@ public final class SignozConfig {
       if (url == null) {
         url = env.string("URL", URL_VENDOR_VARS).orElse(null);
       }
-      if (token == null) {
-        token = env.string("TOKEN", TOKEN_VENDOR_VARS).map(Secret::of).orElse(null);
+      if (apiKey == null) {
+        apiKey = env.string("API_KEY", API_KEY_VENDOR_VARS).map(Secret::of).orElse(null);
+      }
+      if (ingestionKey == null) {
+        ingestionKey =
+            env.string("INGESTION_KEY", INGESTION_KEY_VENDOR_VARS).map(Secret::of).orElse(null);
+      }
+      if (otlpEndpoint == null) {
+        otlpEndpoint = env.string("OTLP_ENDPOINT", OTLP_ENDPOINT_VENDOR_VARS).orElse(null);
+      }
+      if (otlpProtocol == null) {
+        Optional<String> p = env.string("OTLP_PROTOCOL", OTLP_PROTOCOL_VENDOR_VARS);
+        if (p.isPresent()) {
+          try {
+            otlpProtocol = OtlpProtocol.parse(p.get());
+          } catch (ConfigException e) {
+            String variable = env.source("OTLP_PROTOCOL", OTLP_PROTOCOL_VENDOR_VARS).orElse("");
+            throw new ConfigException(
+                "config: invalid value in " + variable + " (expected http/protobuf or grpc)");
+          }
+        }
       }
       if (connectTimeout == null) {
         connectTimeout = env.duration("CONNECT_TIMEOUT").orElse(null);
@@ -348,7 +506,7 @@ public final class SignozConfig {
       }
       if (tls == null) {
         TlsOptions.Builder t = TlsOptions.builder();
-        env.string("CA_CERT", CA_CERT_VENDOR_VARS).ifPresent(p -> t.caCertPath(Paths.get(p)));
+        env.string("CA_CERT").ifPresent(p -> t.caCertPath(Paths.get(p)));
         env.string("CLIENT_CERT").ifPresent(p -> t.clientCertPath(Paths.get(p)));
         env.string("CLIENT_KEY").ifPresent(p -> t.clientKeyPath(Paths.get(p)));
         env.bool("INSECURE_SKIP_VERIFY").ifPresent(t::insecureSkipVerify);
@@ -361,7 +519,7 @@ public final class SignozConfig {
     }
 
     /**
-     * Sets the endpoint base URL.
+     * Sets the query API base URL (default {@link #DEFAULT_URL}).
      *
      * @param url {@code http} or {@code https} URL
      * @return this builder
@@ -372,24 +530,68 @@ public final class SignozConfig {
     }
 
     /**
-     * Sets the API token.
+     * Sets the service-account API key (any role works, viewer included).
      *
-     * @param token token
+     * @param apiKey key
      * @return this builder
      */
-    public Builder token(Secret token) {
-      this.token = token;
+    public Builder apiKey(Secret apiKey) {
+      this.apiKey = apiKey;
       return this;
     }
 
     /**
-     * Sets the API token.
+     * Sets the service-account API key.
      *
-     * @param token token
+     * @param apiKey key
      * @return this builder
      */
-    public Builder token(String token) {
-      this.token = token == null ? null : Secret.of(token);
+    public Builder apiKey(String apiKey) {
+      this.apiKey = apiKey == null ? null : Secret.of(apiKey);
+      return this;
+    }
+
+    /**
+     * Sets the collector endpoint for logs and traces.
+     *
+     * @param endpoint {@code http} or {@code https} URL
+     * @return this builder
+     */
+    public Builder otlpEndpoint(String endpoint) {
+      this.otlpEndpoint = endpoint;
+      return this;
+    }
+
+    /**
+     * Sets the OTLP protocol (default {@link OtlpProtocol#HTTP_PROTOBUF}).
+     *
+     * @param protocol protocol
+     * @return this builder
+     */
+    public Builder otlpProtocol(OtlpProtocol protocol) {
+      this.otlpProtocol = protocol;
+      return this;
+    }
+
+    /**
+     * Sets the SigNoz Cloud ingestion key (self-hosted collectors ignore it).
+     *
+     * @param ingestionKey key
+     * @return this builder
+     */
+    public Builder ingestionKey(Secret ingestionKey) {
+      this.ingestionKey = ingestionKey;
+      return this;
+    }
+
+    /**
+     * Sets the SigNoz Cloud ingestion key.
+     *
+     * @param ingestionKey key
+     * @return this builder
+     */
+    public Builder ingestionKey(String ingestionKey) {
+      this.ingestionKey = ingestionKey == null ? null : Secret.of(ingestionKey);
       return this;
     }
 
@@ -460,7 +662,7 @@ public final class SignozConfig {
     }
 
     /**
-     * Adds a header sent with every request.
+     * Adds a header sent with every request (query API and OTLP exports).
      *
      * @param name header name
      * @param value header value

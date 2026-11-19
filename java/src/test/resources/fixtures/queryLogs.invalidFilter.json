@@ -1,0 +1,20 @@
+{
+  "status": "error",
+  "error": {
+    "type": "invalid-input",
+    "code": "invalid_input",
+    "message": "Found 2 syntax errors while parsing the filter expression.",
+    "url": "https://signoz.io/docs/userguide/search-troubleshooting/",
+    "errors": [
+      {
+        "message": "line 1:14 expecting one of {boolean, number, quoted text} but got '('",
+        "suggestions": []
+      },
+      {
+        "message": "line 1:17 expecting one of {(, ), AND, FREETEXT, NOT, boolean, has(), hasAll(), hasAny(), hasToken(), number, quoted text, search()} but got EOF",
+        "suggestions": []
+      }
+    ],
+    "suggestions": []
+  }
+}

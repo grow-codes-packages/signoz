@@ -1,0 +1,133 @@
+{
+  "status": "success",
+  "data": {
+    "startTimestampMillis": 1795033260000,
+    "endTimestampMillis": 1795033260150,
+    "rootServiceName": "sdk-fe67ae4b",
+    "rootServiceEntryPoint": "GET /verify",
+    "totalSpansCount": 3,
+    "totalErrorSpansCount": 1,
+    "spans": [
+      {
+        "attributes": {
+          "http.request.method": "GET"
+        },
+        "duration_nano": 150000000,
+        "events": [],
+        "flags": 0,
+        "has_error": false,
+        "is_remote": "unknown",
+        "kind_string": "Server",
+        "name": "GET /verify",
+        "parent_span_id": "",
+        "resource": {
+          "service.name": "sdk-fe67ae4b"
+        },
+        "scope": {
+          "name": "grow-sdk-verify"
+        },
+        "span_id": "00f067aa0ba902b7",
+        "time_unix": 1795033260000,
+        "trace_id": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b",
+        "trace_state": "",
+        "references": [
+          {
+            "traceId": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b",
+            "refType": "CHILD_OF"
+          }
+        ],
+        "http_method": "GET",
+        "status_code": 1,
+        "status_code_string": "Ok",
+        "sub_tree_node_count": 3,
+        "has_children": true,
+        "level": 0
+      },
+      {
+        "attributes": {
+          "db.system": "postgresql"
+        },
+        "duration_nano": 100000000,
+        "events": [
+          {
+            "name": "exception",
+            "timeUnixNano": 1795033260020000000,
+            "attributeMap": {
+              "exception.message": "boom"
+            },
+            "isError": true
+          }
+        ],
+        "flags": 0,
+        "has_error": true,
+        "is_remote": "unknown",
+        "kind_string": "Client",
+        "name": "db.query",
+        "parent_span_id": "00f067aa0ba902b7",
+        "resource": {
+          "service.name": "sdk-fe67ae4b"
+        },
+        "scope": {
+          "name": "grow-sdk-verify"
+        },
+        "span_id": "1111111111111111",
+        "time_unix": 1795033260020,
+        "trace_id": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b",
+        "trace_state": "",
+        "references": [
+          {
+            "traceId": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b",
+            "spanId": "00f067aa0ba902b7",
+            "refType": "CHILD_OF"
+          },
+          {
+            "traceId": "0af7651916cd43dd8448eb211c80319c",
+            "spanId": "b7ad6b7169203331",
+            "refType": "FOLLOWS_FROM"
+          }
+        ],
+        "status_code": 2,
+        "status_code_string": "Error",
+        "status_message": "boom",
+        "sub_tree_node_count": 2,
+        "has_children": true,
+        "level": 1
+      },
+      {
+        "attributes": {},
+        "duration_nano": 98000000,
+        "events": [],
+        "flags": 0,
+        "has_error": false,
+        "is_remote": "unknown",
+        "kind_string": "Server",
+        "name": "SELECT users",
+        "parent_span_id": "1111111111111111",
+        "resource": {
+          "service.name": "sdk-db-fe67ae4b"
+        },
+        "scope": {
+          "name": "grow-sdk-verify"
+        },
+        "span_id": "2222222222222222",
+        "time_unix": 1795033260021,
+        "trace_id": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b",
+        "trace_state": "",
+        "references": [
+          {
+            "traceId": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b",
+            "spanId": "1111111111111111",
+            "refType": "CHILD_OF"
+          }
+        ],
+        "status_code_string": "Unset",
+        "sub_tree_node_count": 1,
+        "has_children": false,
+        "level": 2
+      }
+    ],
+    "hasMissingSpans": false,
+    "uncollapsedSpans": null,
+    "hasMore": false
+  }
+}

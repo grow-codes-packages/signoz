@@ -1,0 +1,80 @@
+{
+  "status": "success",
+  "data": {
+    "type": "raw",
+    "meta": {
+      "rowsScanned": 9,
+      "bytesScanned": 2011,
+      "durationMs": 75,
+      "stepIntervals": {
+        "A": 10
+      }
+    },
+    "data": {
+      "results": [
+        {
+          "queryName": "A",
+          "nextCursor": "",
+          "rows": [
+            {
+              "data": {
+                "attributes": {
+                  "db.system": "postgresql"
+                },
+                "db_name": "",
+                "db_operation": "",
+                "duration_nano": 100000000,
+                "events": [
+                  {
+                    "name": "exception",
+                    "timeUnixNano": 1795033260020000000,
+                    "attributes": {
+                      "exception.message": "boom"
+                    }
+                  }
+                ],
+                "external_http_method": "",
+                "external_http_url": "",
+                "flags": 0,
+                "has_error": true,
+                "http_host": "",
+                "http_method": "",
+                "http_url": "",
+                "is_remote": "unknown",
+                "kind": 3,
+                "kind_string": "Client",
+                "links": [
+                  {
+                    "traceId": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b",
+                    "spanId": "00f067aa0ba902b7"
+                  },
+                  {
+                    "traceId": "0af7651916cd43dd8448eb211c80319c",
+                    "spanId": "b7ad6b7169203331"
+                  }
+                ],
+                "name": "db.query",
+                "parent_span_id": "00f067aa0ba902b7",
+                "resource": {
+                  "service.name": "sdk-fe67ae4b"
+                },
+                "response_status_code": "",
+                "scope": {
+                  "name": "grow-sdk-verify"
+                },
+                "span_id": "1111111111111111",
+                "status_code": 2,
+                "status_code_string": "Error",
+                "status_message": "boom",
+                "timestamp": "2026-11-18T20:21:00.02Z",
+                "trace_id": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b",
+                "trace_state": ""
+              },
+              "timestamp": "2026-11-18T20:21:00.02Z"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

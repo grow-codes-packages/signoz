@@ -198,7 +198,9 @@ class TracingSetupTest {
             config()
                 .batch(
                     new TracingConfig.BatchSettings(
-                        10, 5, Duration.ofSeconds(5), Duration.ofMillis(100)))
+                        // export timeout (2 s) far above the 100 ms flush wait, and the exporter's
+                        // shutdown never completes: both waits below time out deterministically.
+                        10, 5, Duration.ofSeconds(5), Duration.ofSeconds(2)))
                 .build(),
             c -> stuck);
     h.tracer("t").spanBuilder("s").startSpan().end();

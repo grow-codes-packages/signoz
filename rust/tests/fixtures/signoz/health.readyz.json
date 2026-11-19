@@ -1,0 +1,25 @@
+{
+  "status": "success",
+  "data": {
+    "healthy": true,
+    "services": {
+      "running": [
+        "instrumentation",
+        "pprof",
+        "analytics",
+        "alertmanager",
+        "licensing",
+        "statsreporter",
+        "tokenizer",
+        "authz",
+        "user",
+        "auditor",
+        "meterreporter",
+        "ruler",
+        "systemdashboard",
+        "spanmappergroup",
+        "apiserver"
+      ]
+    }
+  }
+}

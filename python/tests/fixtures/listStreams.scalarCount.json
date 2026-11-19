@@ -1,0 +1,61 @@
+{
+  "status": "success",
+  "data": {
+    "type": "scalar",
+    "meta": {
+      "rowsScanned": 31,
+      "bytesScanned": 4405,
+      "durationMs": 13,
+      "stepIntervals": {
+        "A": 10
+      }
+    },
+    "data": {
+      "results": [
+        {
+          "queryName": "A",
+          "columns": [
+            {
+              "name": "service.name",
+              "signal": "",
+              "fieldContext": "",
+              "fieldDataType": "",
+              "queryName": "A",
+              "aggregationIndex": 0,
+              "meta": {},
+              "columnType": "group"
+            },
+            {
+              "name": "__result_0",
+              "signal": "",
+              "fieldContext": "",
+              "fieldDataType": "",
+              "queryName": "A",
+              "aggregationIndex": 0,
+              "meta": {},
+              "columnType": "aggregation"
+            }
+          ],
+          "data": [
+            [
+              "lat-fe67ae4b",
+              1
+            ],
+            [
+              "sdk-fe67ae4b",
+              12
+            ],
+            [
+              "tg-grpc-fe67ae4b",
+              5
+            ],
+            [
+              "tg-httppb-fe67ae4b",
+              5
+            ]
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "status": "error",
+  "error": {
+    "type": "unauthenticated",
+    "code": "incorrect_password",
+    "message": "invalid email or password",
+    "errors": [],
+    "suggestions": []
+  }
+}

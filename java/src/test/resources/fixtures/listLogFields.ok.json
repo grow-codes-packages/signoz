@@ -1,0 +1,123 @@
+{
+  "status": "success",
+  "data": {
+    "keys": {
+      "app": [
+        {
+          "name": "app",
+          "signal": "logs",
+          "fieldContext": "attribute",
+          "fieldDataType": "string"
+        }
+      ],
+      "body": [
+        {
+          "name": "body",
+          "signal": "logs",
+          "fieldContext": "log",
+          "fieldDataType": "string"
+        }
+      ],
+      "deployment.environment": [
+        {
+          "name": "deployment.environment",
+          "signal": "logs",
+          "fieldContext": "resource",
+          "fieldDataType": "string"
+        }
+      ],
+      "ok": [
+        {
+          "name": "ok",
+          "signal": "logs",
+          "fieldContext": "attribute",
+          "fieldDataType": "bool"
+        }
+      ],
+      "run.id": [
+        {
+          "name": "run.id",
+          "signal": "logs",
+          "fieldContext": "attribute",
+          "fieldDataType": "string"
+        }
+      ],
+      "scope_name": [
+        {
+          "name": "scope_name",
+          "description": "Logger name. Learn more about instrumentation scope [here](https://opentelemetry.io/docs/concepts/instrumentation-scope/)",
+          "signal": "logs",
+          "fieldContext": "scope",
+          "fieldDataType": "string"
+        }
+      ],
+      "scope_version": [
+        {
+          "name": "scope_version",
+          "signal": "logs",
+          "fieldContext": "scope",
+          "fieldDataType": "string"
+        }
+      ],
+      "seq": [
+        {
+          "name": "seq",
+          "signal": "logs",
+          "fieldContext": "attribute",
+          "fieldDataType": "number"
+        }
+      ],
+      "service.name": [
+        {
+          "name": "service.name",
+          "signal": "logs",
+          "fieldContext": "resource",
+          "fieldDataType": "string"
+        }
+      ],
+      "severity_number": [
+        {
+          "name": "severity_number",
+          "description": "Numerical value of the severity. Learn more [here](https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-severitynumber)",
+          "signal": "logs",
+          "fieldContext": "log",
+          "fieldDataType": "number"
+        }
+      ],
+      "severity_text": [
+        {
+          "name": "severity_text",
+          "description": "Log level. Learn more [here](https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-severitytext)",
+          "signal": "logs",
+          "fieldContext": "log",
+          "fieldDataType": "string"
+        }
+      ],
+      "span_id": [
+        {
+          "name": "span_id",
+          "signal": "logs",
+          "fieldContext": "log",
+          "fieldDataType": "string"
+        }
+      ],
+      "trace_flags": [
+        {
+          "name": "trace_flags",
+          "signal": "logs",
+          "fieldContext": "log",
+          "fieldDataType": "number"
+        }
+      ],
+      "trace_id": [
+        {
+          "name": "trace_id",
+          "signal": "logs",
+          "fieldContext": "log",
+          "fieldDataType": "string"
+        }
+      ]
+    },
+    "complete": true
+  }
+}

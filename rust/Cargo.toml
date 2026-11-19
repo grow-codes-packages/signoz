@@ -24,7 +24,7 @@ path = "src/lib.rs"
 [features]
 default = ["tracing-layer", "log-bridge"]
 # Blocking wrapper (`blocking::SignozClient`) that owns a current-thread tokio runtime.
-blocking = []
+blocking = ["tokio/rt-multi-thread"]
 # In-memory fakes and the conformance runner (`testing` module).
 testing = []
 # `tracing_subscriber::Layer` that forwards tracing events to a `LogClient` (`LogLayer`).
@@ -58,18 +58,26 @@ flate2 = "1.0.30"
 regex = "1.10"
 humantime = "2.1"
 opentelemetry_sdk = { version = "0.31", default-features = false, features = ["trace", "rt-tokio", "experimental_trace_batch_span_processor_with_async_runtime"] }
-opentelemetry-otlp = { version = "0.31", default-features = false, features = ["trace", "http-proto", "grpc-tonic", "reqwest-client", "gzip-tonic", "gzip-http"] }
+opentelemetry-otlp = { version = "0.31", default-features = false, features = ["trace", "http-proto", "grpc-tonic", "reqwest-client", "gzip-tonic", "gzip-http", "tls-roots"] }
 tracing-opentelemetry = { version = "0.32", default-features = false }
 tower = { version = "0.5", optional = true, default-features = false }
 http = "1.1"
 pin-project-lite = { version = "0.2", optional = true }
 reqwest-middleware = { version = "0.4", optional = true, default-features = false }
+# SigNoz service code: OTLP logs protobuf + gRPC client, cursor encoding.
+opentelemetry-proto = { version = "0.31", default-features = false, features = ["gen-tonic", "logs", "trace"] }
+prost = { version = "0.14", default-features = false, features = ["std"] }
+tonic = { version = "0.14", default-features = false, features = ["channel", "gzip", "tls-ring", "tls-native-roots"] }
+base64 = "0.22"
 
 [dev-dependencies]
 tokio = { version = "1.43", features = ["rt-multi-thread", "macros", "time", "sync", "test-util"] }
 wiremock = "0.6"
 tracing-subscriber = { version = "0.3.18", default-features = false, features = ["std", "fmt", "registry"] }
 serde_json = "1.0.120"
+tonic = { version = "0.14", default-features = false, features = ["server", "router", "channel", "gzip"] }
+tokio-stream = { version = "0.1", default-features = false, features = ["net"] }
+flate2 = "1.0.30"
 
 [package.metadata.docs.rs]
 all-features = true

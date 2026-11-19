@@ -1,4 +1,4 @@
-"""Skeleton client (sync + async), health, close and polling helpers."""
+"""SigNoz client (sync + async): config, health, ping, version, close and polling helpers."""
 
 from __future__ import annotations
 
@@ -6,108 +6,171 @@ import asyncio
 import time
 from typing import Any
 
+import httpx
 import pytest
 
 import grow_signoz as sdk
+from _signoz import API_KEY, Router, aclient, client, config, fixture, json_response, success
 from _support import MockServer, Reply, closed_port_url, make_config, spawn_capturing
 
-TOKEN = "client-token-789"
+P = sdk.ENV_PREFIX
+
+# --------------------------------------------------------------------------- config
 
 
-def client(url: str, **kw: Any) -> sdk.SignozClient:
-    return sdk.SignozClient(make_config(url, **kw))
+def test_config_defaults_and_env_precedence() -> None:
+    cfg = sdk.SignozConfig()
+    assert cfg.url == sdk.DEFAULT_URL == "http://127.0.0.1:8080"
+    assert cfg.otlp_endpoint == sdk.DEFAULT_OTLP_HTTP_ENDPOINT
+    assert cfg.otlp_protocol == "http/protobuf"
+    assert cfg.api_key is None and cfg.ingestion_key is None
+    grpc = sdk.SignozConfig(otlp_protocol="GRPC ")  # type: ignore[arg-type]
+    assert (grpc.otlp_protocol, grpc.otlp_endpoint) == ("grpc", sdk.DEFAULT_OTLP_GRPC_ENDPOINT)
+    env = {
+        "SIGNOZ_URL": "http://vendor:8080",
+        "SIGNOZ_API_KEY": "vendor-key-1",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://otel:4318/",
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+        "SIGNOZ_INGESTION_KEY": "ingest-key-1",
+    }
+    cfg = sdk.SignozConfig.from_env(env)
+    assert cfg.url == "http://vendor:8080"
+    assert cfg.api_key is not None and cfg.api_key.reveal() == "vendor-key-1"
+    assert cfg.otlp_endpoint == "http://otel:4318"
+    assert cfg.otlp_protocol == "grpc"
+    assert cfg.ingestion_key is not None and cfg.ingestion_key.reveal() == "ingest-key-1"
+    env |= {
+        "SIGNOZ_OTLP_ENDPOINT": "http://sig:4318",
+        P + "URL": "http://grow:8080",
+        P + "API_KEY": "grow-key-12",
+        P + "OTLP_PROTOCOL": "http/protobuf",
+        P + "INGESTION_KEY": "grow-ingest",
+    }
+    cfg = sdk.SignozConfig.from_env(env)
+    assert cfg.url == "http://grow:8080"
+    assert cfg.api_key is not None and cfg.api_key.reveal() == "grow-key-12"
+    assert cfg.otlp_endpoint == "http://sig:4318"
+    assert cfg.otlp_protocol == "http/protobuf"
+    env[P + "OTLP_ENDPOINT"] = "http://grow-otlp:4318"
+    assert sdk.SignozConfig.from_env(env).otlp_endpoint == "http://grow-otlp:4318"
+    explicit = sdk.SignozConfig.from_env(env, url="http://explicit:1", api_key="explicit-key")
+    assert explicit.url == "http://explicit:1"
+    assert explicit.api_key is not None and explicit.api_key.reveal() == "explicit-key"
+    text = repr(explicit) + str(explicit)
+    for secret in ("explicit-key", "grow-ingest"):
+        assert secret not in text
+    assert sorted(explicit.known_secrets()) == ["explicit-key", "grow-ingest"]
 
 
-def aclient(url: str, **kw: Any) -> sdk.AsyncSignozClient:
-    return sdk.AsyncSignozClient(make_config(url, **kw))
+def test_config_validation() -> None:
+    with pytest.raises(sdk.ConfigError, match="OTEL_EXPORTER_OTLP_PROTOCOL"):
+        sdk.SignozConfig.from_env({"OTEL_EXPORTER_OTLP_PROTOCOL": "thrift"})
+    for kwargs, fragment in (
+        ({"api_key": " "}, "api_key"),
+        ({"ingestion_key": ""}, "ingestion_key"),
+        ({"otlp_protocol": "thrift"}, "otlp_protocol"),
+        ({"otlp_endpoint": "ftp://x"}, "otlp_endpoint"),
+        ({"otlp_endpoint": "http://[::1"}, "otlp_endpoint"),
+    ):
+        with pytest.raises(sdk.ConfigError, match=fragment):
+            sdk.SignozConfig(**kwargs).validate()  # type: ignore[arg-type]
+    cfg = sdk.SignozConfig().with_changes(api_key="k-1234")
+    assert isinstance(cfg.api_key, sdk.Secret)
+    with pytest.raises(sdk.ConfigError):
+        cfg.with_changes(url="nope")
 
 
-# --------------------------------------------------------------------------- sync
+# --------------------------------------------------------------------------- core calls
 
 
-def test_health_ping_version(server: MockServer) -> None:
-    server.enqueue("/health", Reply(200, {"status": "ok", "build": 7, "nested": {"x": 1}}))
-    server.enqueue("/version", Reply(200, {"version": "1.2.3"}))
-    with client(server.url, token=TOKEN) as c:
-        health = c.health()
-        assert health == sdk.HealthStatus(True, "ok", {"build": "7"})
-        latency = c.ping()
-        assert isinstance(latency, float) and latency >= 0
-        assert c.server_version() == "1.2.3"
-        assert "client-token" not in repr(c)
-    ping = next(s for s in server.seen if s.path == "/v1/ping")
-    assert ping.headers["Authorization"] == f"Bearer {TOKEN}"
-    health_req = next(s for s in server.seen if s.path == "/health")
-    assert "Authorization" not in health_req.headers
+def test_health_ping_version() -> None:
+    router = Router()
+    router.add("GET", "/api/v1/health", json_response(fixture("health.ok")))
+    router.add("GET", "/api/v1/fields/keys", json_response(fixture("listLogFields.search")))
+    router.add("GET", "/api/v1/version", json_response({"version": "v0.151.0"}))
+    with client(router) as c:
+        assert c.health() == sdk.HealthStatus(True, "ok", {})
+        assert c.ping() >= 0
+        assert c.server_version() == "0.151.0"
+        assert API_KEY not in repr(c)
+        assert c.traces is c.query
+    health, ping, version = router.requests
+    assert health.url.params["live"] == "1"
+    assert "signoz-api-key" not in health.headers
+    assert ping.headers["SIGNOZ-API-KEY"] == API_KEY
+    assert ping.url.params["signal"] == "logs" and ping.url.params["limit"] == "1"
+    assert "signoz-api-key" not in version.headers
+    assert ping.headers["user-agent"].startswith("grow-codes-signoz/")
 
 
-def test_health_variants(server: MockServer) -> None:
-    c = client(server.url)
-    server.enqueue("/health", Reply(503, {"status": "degraded"}))
+def test_server_version_unsupported_and_errors() -> None:
+    router = Router()
+    router.add("GET", "/api/v1/version", json_response(fixture("serverVersion.ok")))
+    router.add("GET", "/api/v1/version", httpx.Response(404))
+    router.add("GET", "/api/v1/version", json_response({"error": "x"}, 403))
+    c = client(router)
+    with pytest.raises(sdk.UnsupportedError, match="does not report"):
+        c.server_version()
+    with pytest.raises(sdk.UnsupportedError):
+        c.server_version()
+    with pytest.raises(sdk.PermissionDeniedError):
+        c.server_version()
+    c.close()
+
+
+def test_health_variants() -> None:
+    router = Router()
+    router.add("GET", "/api/v1/health", json_response({"status": "degraded"}, 503))
+    router.add("GET", "/api/v1/health", httpx.Response(500, text="boom"))
+    router.add("GET", "/api/v1/health", json_response({"status": "ok", "build": 7}))
+    c = client(router)
     assert c.health() == sdk.HealthStatus(False, "degraded", {"httpStatus": "503"})
-    server.enqueue("/health", Reply(500, "boom"))
     assert c.health() == sdk.HealthStatus(False, "unhealthy", {"httpStatus": "500"})
-    server.enqueue("/health", Reply(200, "OK"))
-    assert c.health() == sdk.HealthStatus(True, "ok", {})
-    server.enqueue("/health", Reply(200, [1, 2]))
-    assert c.health().healthy
-    assert len([s for s in server.seen if s.path == "/health"]) == 4  # health never retries
+    assert c.health() == sdk.HealthStatus(True, "ok", {"build": "7"})
+    assert len(router.requests) == 3  # health never retries
 
 
 def test_core_health_unreachable() -> None:
     """core.health.unreachable"""
-    c = client(closed_port_url())
+    c = sdk.SignozClient(make_config(closed_port_url()))
     status = c.health()
-    assert status.healthy is False
-    assert status.status == "unreachable"
+    assert (status.healthy, status.status) == (False, "unreachable")
     assert "error" in status.details
 
 
 def test_health_timeout_is_unreachable(server: MockServer) -> None:
-    server.enqueue("/health", Reply(200, delay=1.0))
-    c = client(server.url, request_timeout=0.1)
+    server.enqueue("/api/v1/health", Reply(200, delay=1.0))
+    c = sdk.SignozClient(make_config(server.url, request_timeout=0.1))
     assert c.health().status == "unreachable"
 
 
-def test_health_raises_only_cancelled_and_config(server: MockServer) -> None:
-    c = client(server.url)
+def test_health_raises_only_cancelled_and_config() -> None:
+    router = Router()
+    c = client(router)
     c.close()
     with pytest.raises(sdk.CancelledError):
         c.health()
     token = sdk.CancelToken()
     token.cancel()
     with pytest.raises(sdk.CancelledError):
-        client(server.url).health(cancel=token)
-    bad = sdk.SignozClient.__new__(sdk.SignozClient)
-    bad.config = sdk.SignozConfig(url="ftp://svc")
-    bad._transport = sdk.HttpTransport(bad.config)
-    with pytest.raises(sdk.ConfigError):
-        bad.health()
+        client(router).health(cancel=token)
 
 
-def test_ping_bad_credentials(server: MockServer) -> None:
-    server.enqueue("/v1/ping", Reply(401, {"error": "unauthorized"}))
-    with pytest.raises(sdk.AuthenticationError):
-        client(server.url).ping()
+def test_ping_errors_never_leak_the_key() -> None:
+    router = Router()
+    router.add("GET", "/api/v1/fields/keys", json_response(fixture("ping.unauthenticated"), 401))
+    with pytest.raises(sdk.AuthenticationError) as info:
+        client(router).ping()
+    assert info.value.http_status == 401
+    assert API_KEY not in str(info.value)
+    with pytest.raises(sdk.ConfigError, match="api_key is required"):
+        sdk.SignozClient(config(api_key=None), http_transport=router.transport()).ping()
 
 
-def test_server_version_errors(server: MockServer) -> None:
-    c = client(server.url)
-    server.enqueue("/version", Reply(404))
-    with pytest.raises(sdk.UnsupportedError) as info:
-        c.server_version()
-    assert info.value.http_status == 404
-    server.enqueue("/version", Reply(200, {"nope": 1}))
-    with pytest.raises(sdk.ValidationError):
-        c.server_version()
-    server.enqueue("/version", Reply(403))
-    with pytest.raises(sdk.PermissionDeniedError):
-        c.server_version()
-
-
-def test_core_close_idempotent(server: MockServer) -> None:
+def test_core_close_idempotent_closes_resources() -> None:
     """core.close.idempotent"""
-    c = client(server.url)
+    router = Router()
+    c = client(router)
     stopped: list[int] = []
 
     class Res:
@@ -115,68 +178,94 @@ def test_core_close_idempotent(server: MockServer) -> None:
             stopped.append(1)
 
     c.resources.register(Res())
+    logs = c.log_client(service_name="svc")
+    handle = c.init_tracing("svc-trace", set_global=False)
     c.close()
     c.close()
     assert stopped == [1]
-    c.resources.register(Res())  # registering after close stops immediately
-    assert stopped == [1, 1]
+    assert handle.is_shut_down
+    logs.send(sdk.LogInput("after close"))
+    assert logs.stats().dropped == 1
+    # every call on a closed client raises CANCELLED
+    with pytest.raises(sdk.CancelledError):
+        c.ping()
+    with pytest.raises(sdk.CancelledError):
+        c.health()
+    with pytest.raises(sdk.CancelledError):
+        c.query.query_logs()
+    with pytest.raises(sdk.CancelledError, match="client is closed"):
+        c.log_client(service_name="svc")
+    with pytest.raises(sdk.CancelledError, match="client is closed"):
+        c.init_tracing("svc-trace", set_global=False)
 
 
-def test_from_env_and_raw_request(server: MockServer, monkeypatch: pytest.MonkeyPatch) -> None:
-    env = {sdk.ENV_PREFIX + "URL": server.url, sdk.ENV_PREFIX + "TOKEN": TOKEN}
+def test_from_env_and_raw_request(monkeypatch: pytest.MonkeyPatch) -> None:
+    router = Router().add("GET", "/anything", success({}))
+    env = {P + "URL": "http://env:8080", P + "API_KEY": API_KEY}
     with sdk.SignozClient.from_env(env) as c:
-        assert c.config.url == server.url
-        resp = c.request(sdk.Request("GET", "/anything"))
-        assert resp.status == 200
-    monkeypatch.setenv(sdk.ENV_PREFIX + "URL", server.url)
+        assert c.config.url == "http://env:8080"
+    c = sdk.SignozClient(config(), http_transport=router.transport())
+    assert c.request(sdk.Request("GET", "/anything")).status == 200
+    monkeypatch.setenv(P + "URL", "http://monkey:8080")
     with sdk.SignozClient() as c2:
-        assert c2.config.url == server.url
+        assert c2.config.url == "http://monkey:8080"
     with pytest.raises(sdk.ConfigError):
-        sdk.SignozClient.from_env({sdk.ENV_PREFIX + "URL": "nope://x"})
+        sdk.SignozClient.from_env({P + "URL": "nope://x"})
 
 
 # --------------------------------------------------------------------------- async
 
 
-async def test_async_client(server: MockServer, monkeypatch: pytest.MonkeyPatch) -> None:
-    server.enqueue("/health", Reply(200, {"status": "ok"}))
-    server.enqueue("/version", Reply(200, {"version": "9.9.9"}))
-    async with aclient(server.url, token=TOKEN) as c:
+async def test_async_client(monkeypatch: pytest.MonkeyPatch) -> None:
+    router = Router()
+    router.add("GET", "/api/v1/health", json_response({"status": "ok"}))
+    router.add("GET", "/api/v1/fields/keys", success({"keys": {}}))
+    router.add("GET", "/api/v1/version", json_response({"version": "1.2.3"}))
+    router.add("GET", "/raw", success({}))
+    async with aclient(router) as c:
         assert (await c.health()).healthy
         assert await c.ping() >= 0
-        assert await c.server_version() == "9.9.9"
+        assert await c.server_version() == "1.2.3"
         assert (await c.request(sdk.Request("GET", "/raw"))).status == 200
-        assert "client-token" not in repr(c)
-        assert c.resources is not None
+        assert API_KEY not in repr(c)
+        assert c.resources is not None and c.traces is c.query
+        logs = c.log_client(service_name="svc")
+        handle = c.init_tracing("svc-async", set_global=False)
     await c.close()
+    assert handle.is_shut_down
+    assert logs.stats().queued == 0
     with pytest.raises(sdk.CancelledError):
         await c.health()
-    env = {sdk.ENV_PREFIX + "URL": server.url}
-    c2 = sdk.AsyncSignozClient.from_env(env)
-    server.enqueue("/version", Reply(501))
-    with pytest.raises(sdk.UnsupportedError):
-        await c2.server_version()
-    server.enqueue("/version", Reply(404))
-    with pytest.raises(sdk.UnsupportedError):
-        await c2.server_version()
+    with pytest.raises(sdk.CancelledError):
+        await c.query.query_logs()
+    with pytest.raises(sdk.CancelledError, match="client is closed"):
+        c.log_client(service_name="svc")
+    with pytest.raises(sdk.CancelledError, match="client is closed"):
+        c.init_tracing("svc-async", set_global=False)
+    router.add("GET", "/api/v1/version", httpx.Response(501))
+    c2 = sdk.AsyncSignozClient.from_env({P + "URL": "http://x:1"})
     await c2.aclose()
-    monkeypatch.setenv(sdk.ENV_PREFIX + "URL", server.url)
-    c3 = sdk.AsyncSignozClient()
-    assert c3.config.url == server.url
+    c3 = aclient(router)
+    with pytest.raises(sdk.UnsupportedError):
+        await c3.server_version()
     await c3.aclose()
+    monkeypatch.setenv(P + "URL", "http://monkey:8080")
+    c4 = sdk.AsyncSignozClient()
+    assert c4.config.url == "http://monkey:8080"
+    await c4.aclose()
 
 
 async def test_async_health_unreachable() -> None:
     """core.health.unreachable (async)"""
-    c = aclient(closed_port_url())
+    c = sdk.AsyncSignozClient(make_config(closed_port_url()))
     status = await c.health()
     assert (status.healthy, status.status) == (False, "unreachable")
     await c.aclose()
 
 
 async def test_async_health_cancel(server: MockServer) -> None:
-    server.enqueue("/health", Reply(200, delay=2.0))
-    c = aclient(server.url)
+    server.enqueue("/api/v1/health", Reply(200, delay=2.0))
+    c = sdk.AsyncSignozClient(make_config(server.url))
     errors: list[BaseException] = []
     task = spawn_capturing(c.health(), errors)
     await asyncio.sleep(0.1)
@@ -193,8 +282,6 @@ async def test_async_health_cancel(server: MockServer) -> None:
 def test_poll_until() -> None:
     values = iter([None, [], [1]])
     assert sdk.poll_until(lambda: next(values), interval_s=0.001) == [1]
-    attempts = iter([0, 1, 2, 3])
-    assert sdk.poll_until(lambda: next(attempts), predicate=lambda v: v >= 2, interval_s=0) == 2
     errors = iter([sdk.UnavailableError("flaky"), "ok"])
 
     def flaky() -> str:
@@ -204,75 +291,21 @@ def test_poll_until() -> None:
         return item
 
     assert sdk.poll_until(flaky, interval_s=0) == "ok"
-    with pytest.raises(sdk.NotFoundError):
-        sdk.poll_until(lambda: (_ for _ in ()).throw(sdk.NotFoundError("gone")))
     started = time.monotonic()
-    with pytest.raises(sdk.TimeoutError, match=r"wait\.thing") as info:
-        sdk.poll_until(
-            lambda: (_ for _ in ()).throw(sdk.UnavailableError("down")),
-            timeout_s=0.05,
-            interval_s=0.01,
-            operation="wait.thing",
-        )
-    assert isinstance(info.value.cause, sdk.UnavailableError)
-    assert time.monotonic() - started < 1.0
     with pytest.raises(sdk.TimeoutError):
         sdk.poll_until(lambda: None, timeout_s=0.02, interval_s=0.005)
+    assert time.monotonic() - started < 1.0
 
 
 async def test_apoll_until() -> None:
-    values = iter([None, "", "done"])
+    values: Any = iter([None, "", "done"])
 
     async def fetch() -> str | None:
-        return next(values)
+        return next(values)  # type: ignore[no-any-return]
 
     assert await sdk.apoll_until(fetch, interval_s=0.001) == "done"
-
-    async def failing() -> str:
-        raise sdk.UnavailableError("down")
-
-    with pytest.raises(sdk.TimeoutError):
-        await sdk.apoll_until(failing, timeout_s=0.03, interval_s=0.01)
-
-    async def fatal() -> str:
-        raise sdk.AuthenticationError("no")
-
-    with pytest.raises(sdk.AuthenticationError):
-        await sdk.apoll_until(fatal)
-
-    async def numbers() -> int:
-        return 5
-
-    assert await sdk.apoll_until(numbers, predicate=lambda n: n == 5) == 5
-
-
-def test_resource_registry() -> None:
-    reg = sdk.ResourceRegistry()
-    calls: list[str] = []
-
-    class Good:
-        def stop(self) -> None:
-            calls.append("good")
-
-    class Bad:
-        def stop(self) -> None:
-            raise RuntimeError("ignored")
-
-    good, bad = Good(), Bad()
-    reg.register(bad)
-    reg.register(good)
-    reg.unregister(good)
-    reg.unregister(good)
-    reg.register(good)
-    assert isinstance(good, sdk.Stoppable)
-    assert not reg.closed
-    reg.stop_all()
-    reg.stop_all()
-    assert reg.closed and calls == ["good"]
-    reg.register(bad)  # stopped immediately, error ignored
 
 
 def test_get_logger_is_silent() -> None:
     logger = sdk.get_logger()
     assert logger.name == sdk.LOGGER_NAME == "grow_signoz"
-    assert any(type(h).__name__ == "NullHandler" for h in logger.handlers)

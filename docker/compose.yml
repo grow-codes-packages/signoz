@@ -30,7 +30,7 @@ x-test: &test
   volumes:
     - bootstrap:/bootstrap:ro
   environment:
-    GROW_SIGNOZ_URL: ${GROW_SIGNOZ_URL:-http://service:8080}
+    GROW_SIGNOZ_URL: ${GROW_SIGNOZ_URL:-http://signoz:8080}
     GROW_BOOTSTRAP_ENV: /bootstrap/env
     GROW_TEST_RUN_ID: ${GROW_TEST_RUN_ID:-local}
   init: true

@@ -360,16 +360,18 @@ def test_context_resolve_and_close() -> None:
 
 
 def demo_server(server: MockServer) -> None:
-    server.defaults["/health"] = Reply(200, {"status": "ok"})
-    server.defaults["/v1/ping"] = Reply(200, {"pong": True})
-    server.defaults["/version"] = Reply(200, {"version": "1.0.0"})
+    server.defaults["/api/v1/health"] = Reply(200, {"status": "ok"})
+    server.defaults["/api/v1/fields/keys"] = Reply(
+        200, {"status": "success", "data": {"keys": {}, "complete": True}}
+    )
+    server.defaults["/api/v1/version"] = Reply(200, {"version": "v1.0.0"})
 
 
 @pytest.mark.parametrize("scenario_doc", r.pytest_params(categories=["core"]))
 def test_core_scenarios_sync(server: MockServer, scenario_doc: dict[str, Any]) -> None:
     demo_server(server)
     runner = r.ConformanceRunner(
-        {"core": lambda c: sdk.SignozClient(make_config(server.url, token="t-1234"))},
+        {"core": lambda c: sdk.SignozClient(make_config(server.url, api_key="t-1234"))},
         capabilities={"version"},
     )
     result = r.assert_scenario(runner, scenario_doc)
@@ -379,7 +381,7 @@ def test_core_scenarios_sync(server: MockServer, scenario_doc: dict[str, Any]) -
 def test_core_scenario_async_client(server: MockServer) -> None:
     demo_server(server)
     runner = r.ConformanceRunner(
-        {"core": lambda c: sdk.AsyncSignozClient(make_config(server.url))},
+        {"core": lambda c: sdk.AsyncSignozClient(make_config(server.url, api_key="t-1234"))},
     )
     report = runner.run()
     assert report.ok, report.summary()

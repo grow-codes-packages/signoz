@@ -397,7 +397,7 @@ def test_core_redaction_error_text(server: MockServer, caplog: pytest.LogCapture
     server.enqueue("/x", Reply(401, {"error": f"invalid token {TOKEN}"}))
     seen: list[Any] = []
     hooks = sdk.Hooks(on_request=seen.append, on_response=seen.append, on_error=seen.append)
-    t = transport(server.url, token=TOKEN, hooks=hooks)
+    t = transport(server.url, api_key=TOKEN, hooks=hooks)
     caplog.set_level(logging.DEBUG, logger=sdk.LOGGER_NAME)
     with pytest.raises(sdk.AuthenticationError) as info:
         t.request(
@@ -422,7 +422,7 @@ def test_core_redaction_error_text(server: MockServer, caplog: pytest.LogCapture
 def test_network_error_text_redacted() -> None:
     with respx.mock(base_url="http://svc") as mock:
         mock.get("/x").mock(side_effect=httpx.ReadError(f"boom {TOKEN}"))
-        t = transport("http://svc", token=TOKEN, retry=fast_retry(max_retries=0))
+        t = transport("http://svc", api_key=TOKEN, retry=fast_retry(max_retries=0))
         with pytest.raises(sdk.UnavailableError) as info:
             t.request(get())
     assert TOKEN not in str(info.value)
@@ -495,7 +495,7 @@ class ListLogger:
 def test_custom_logger_receives_redacted_fields(server: MockServer) -> None:
     log = ListLogger()
     server.enqueue("/x", Reply(503, {"message": f"bad {TOKEN}"}), Reply(200))
-    t = transport(server.url, logger=log, token=TOKEN)
+    t = transport(server.url, logger=log, api_key=TOKEN)
     t.request(get(params={"q": "1"}))
     levels = [lvl for lvl, _, _ in log.lines]
     assert "debug" in levels and "warn" in levels

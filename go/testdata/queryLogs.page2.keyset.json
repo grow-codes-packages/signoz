@@ -1,0 +1,82 @@
+{
+  "status": "success",
+  "data": {
+    "type": "raw",
+    "meta": {
+      "rowsScanned": 24,
+      "bytesScanned": 3390,
+      "durationMs": 24,
+      "stepIntervals": {
+        "A": 10
+      }
+    },
+    "data": {
+      "results": [
+        {
+          "queryName": "A",
+          "nextCursor": "MTc5NTAzMzI2MDAwMg==",
+          "rows": [
+            {
+              "data": {
+                "attributes_bool": {
+                  "ok": true
+                },
+                "attributes_number": {
+                  "seq": 3
+                },
+                "attributes_string": {
+                  "run.id": "fe67ae4b"
+                },
+                "body": "marker-fe67ae4b seq 3 ünïcode it's",
+                "id": "0mUr6Hv3cRUJ7YKn8nyQ4uOYjek",
+                "resources_string": {
+                  "deployment.environment": "test",
+                  "service.name": "sdk-fe67ae4b"
+                },
+                "scope_name": "grow-sdk-verify",
+                "scope_string": {},
+                "scope_version": "",
+                "severity_number": 9,
+                "severity_text": "INFO",
+                "span_id": "00f067aa0ba902b7",
+                "timestamp": 1795033260003000000,
+                "trace_flags": 1,
+                "trace_id": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b"
+              },
+              "timestamp": "2026-11-18T20:21:00.003Z"
+            },
+            {
+              "data": {
+                "attributes_bool": {
+                  "ok": true
+                },
+                "attributes_number": {
+                  "seq": 2
+                },
+                "attributes_string": {
+                  "run.id": "fe67ae4b"
+                },
+                "body": "marker-fe67ae4b seq 2 ünïcode it's",
+                "id": "0mUr6Huwe6BsfdsNNcUy5PaixoG",
+                "resources_string": {
+                  "deployment.environment": "test",
+                  "service.name": "sdk-fe67ae4b"
+                },
+                "scope_name": "grow-sdk-verify",
+                "scope_string": {},
+                "scope_version": "",
+                "severity_number": 9,
+                "severity_text": "INFO",
+                "span_id": "00f067aa0ba902b7",
+                "timestamp": 1795033260002000000,
+                "trace_flags": 1,
+                "trace_id": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b"
+              },
+              "timestamp": "2026-11-18T20:21:00.002Z"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

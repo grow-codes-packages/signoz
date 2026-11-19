@@ -207,7 +207,7 @@ async def test_async_network_errors_and_raise_for_status() -> None:
             side_effect=[httpx.Response(503), httpx.Response(503, json={"status": "down"})]
         )
         mock.get("/r").mock(return_value=httpx.Response(429, headers={"Retry-After": "999"}))
-        t = transport("http://svc", token=TOKEN)
+        t = transport("http://svc", api_key=TOKEN)
         assert (await t.request(get())).attempts == 2
         with pytest.raises(sdk.UnavailableError) as info:
             await t.request(sdk.Request("POST", "/p"))

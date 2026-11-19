@@ -26,6 +26,11 @@ def main() -> None:
     print(config)  # credentials print as [REDACTED]
     with sdk.SignozClient(config) as client:
         print(client.health())
+        # Python logging → SigNoz: a logging.Handler that ships records over OTLP.
+        logs = client.log_client(service_name="example-py-logging")
+        logging.getLogger("app").addHandler(sdk.LogHandler(logs))
+        logging.getLogger("app").warning("disk almost full", extra={"disk": "/var"})
+        logs.flush(10)
 
 
 if __name__ == "__main__":

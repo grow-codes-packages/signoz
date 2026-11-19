@@ -1,0 +1,9 @@
+{
+  "status": "success",
+  "data": {
+    "tokenType": "bearer",
+    "accessToken": "<ACCESS_TOKEN>",
+    "refreshToken": "<REFRESH_TOKEN>",
+    "expiresIn": 1799
+  }
+}

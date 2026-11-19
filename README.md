@@ -20,10 +20,14 @@ Python and Java** — one API, five idiomatic packages, tested against a real Si
 - **Typed client** with timeouts, retries with jitter, `Retry-After`, cancellation and one error
   model (`SignozError` with canonical codes) in every language.
 - **Secrets stay secret**: credentials are redacted in `toString`, logs, hooks and error messages.
-- **Logging**: batched, compressed log shipping with back-pressure, redaction, a logger facade and
-  adapters for the common logging frameworks of each language; log search where SigNoz offers it.
-- **Tracing**: OpenTelemetry setup in one call, span helpers, context propagation, framework
-  middleware and a trace query client.
+- **Logging**: batched, compressed OTLP log shipping to the SigNoz collector (HTTP or gRPC) with
+  back-pressure, redaction, a logger facade and adapters for the common logging frameworks of each
+  language; log queries with a lossless cursor, live tail and field discovery.
+- **Tracing**: OpenTelemetry setup in one call with the SigNoz exporter, span helpers, context
+  propagation, framework middleware and a trace query client (waterfall, search, services,
+  operations, dependencies).
+- **Query API**: aggregations (count, percentiles, …) as scalars or time series, raw
+  `query_range` requests and a `FilterBuilder` for safe filter expressions.
 
 ## Contents
 
@@ -42,9 +46,11 @@ Python and Java** — one API, five idiomatic packages, tested against a real Si
 
 ## Supported service version
 
-Tested in CI against **`signoz/signoz-community:v0.150.0 (+ signoz-otel-collector + ClickHouse)`** (the version pinned in the Grow Codes stack catalog). Other
-versions with the same API usually work; see [Compatibility](#compatibility) and
-[docs/compatibility.md](docs/compatibility.md).
+Tested in CI against the images of the Grow Codes stack catalog:
+**`signoz/signoz-community:v0.150.0`** with the SigNoz OTel Collector **`v0.144.15`** and
+ClickHouse **`25.12.5`**. The query client uses the APIs of that release (`/api/v5/query_range`,
+the v4 trace waterfall, the v3 live tail). Only the MIT-licensed community APIs are used. See
+[Compatibility](#compatibility) and [docs/compatibility.md](docs/compatibility.md).
 
 ## Install
 
@@ -74,9 +80,15 @@ implementation("codes.grow.packages:signoz:0.1.0")
 
 ## Quickstart
 
-Every package reads its configuration from the environment (`GROW_SIGNOZ_URL`,
-`GROW_SIGNOZ_TOKEN`, …, see [Configuration](#configuration)) or from an explicit config
-object. The examples check the service health and make one authenticated call.
+Every package reads its configuration from the environment or from an explicit config object:
+
+```sh
+export GROW_SIGNOZ_URL=http://127.0.0.1:8080             # query API
+export GROW_SIGNOZ_API_KEY=...                           # service-account key (queries only)
+export GROW_SIGNOZ_OTLP_ENDPOINT=http://127.0.0.1:4318   # OTLP collector (logs + traces)
+```
+
+The examples send a log over OTLP and read it back through the query API.
 
 ### TypeScript
 
@@ -85,9 +97,12 @@ import { SignozClient } from "@grow-codes/signoz";
 
 const client = SignozClient.fromEnv();
 try {
-  const health = await client.health();
-  console.log(health.healthy, health.status);
-  console.log("latency ms:", await client.ping());
+  console.log((await client.health()).healthy, await client.ping(), "ms");
+  const logs = client.logClient({ serviceName: "checkout" });
+  logs.logger("orders").info("order placed", { "order.id": 42 });
+  await logs.flush();
+  const rec = await client.logs.waitForLog("service.name = 'checkout' AND body = 'order placed'");
+  console.log(rec.body, rec.attributes);
 } finally {
   await client.close();
 }
@@ -96,14 +111,21 @@ try {
 ### Rust
 
 ```rust
-use grow_signoz::SignozClient;
+use grow_signoz::logging::{attrs, LogClient, LogQueryClient, WaitOptions};
+use grow_signoz::{LogOptions, SignozClient};
 
 #[tokio::main]
-async fn main() -> Result<(), grow_signoz::Error> {
+async fn main() -> grow_signoz::Result<()> {
     let client = SignozClient::from_env()?;
-    let health = client.health().await?;
-    println!("{} {}", health.healthy, health.status);
-    println!("latency: {:?}", client.ping().await?);
+    println!("{} {:?}", client.health().await?.healthy, client.ping().await?);
+    let logs = client.log_client(LogOptions::service("checkout"))?;
+    logs.logger(Some("orders"), attrs! {}).info("order placed", attrs! {"order.id" => 42});
+    logs.flush(None).await?;
+    let rec = client
+        .query()
+        .wait_for_log("service.name = 'checkout' AND body = 'order placed'", WaitOptions::default())
+        .await?;
+    println!("{} {:?}", rec.body, rec.attributes);
     client.close().await;
     Ok(())
 }
@@ -130,23 +152,32 @@ func main() {
 	}
 	defer client.Close()
 
-	health, err := client.Health(ctx)
+	logs, err := client.NewLogClient(signoz.LogOptions{ServiceName: "checkout"})
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(health.Healthy, health.Status)
+	logs.Logger("orders", nil).Info(ctx, "order placed", map[string]signoz.AttrValue{"order.id": 42})
+	_ = logs.Flush(ctx)
+	rec, err := client.Query().WaitForLog(ctx, "service.name = 'checkout' AND body = 'order placed'", signoz.WaitForLogOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(rec.Body, rec.Attributes)
 }
 ```
 
 ### Python
 
 ```python
-from grow_signoz import SignozClient
+import grow_signoz as sdk
 
-with SignozClient.from_env() as client:
-    health = client.health()
-    print(health.healthy, health.status)
-    print("latency ms:", client.ping())
+with sdk.SignozClient.from_env() as client:
+    print(client.health().healthy, client.ping(), "ms")
+    logs = client.log_client(service_name="checkout")
+    logs.logger("orders").info("order placed", {"order.id": 42})
+    logs.flush(10)
+    rec = client.logs.wait_for_log("service.name = 'checkout' AND body = 'order placed'")
+    print(rec.body, dict(rec.attributes))
 ```
 
 Async code uses `AsyncSignozClient` with the same methods (`async with`, `await client.health()`).
@@ -154,12 +185,22 @@ Async code uses `AsyncSignozClient` with the same methods (`async with`, `await 
 ### Java
 
 ```java
+import codes.grow.packages.signoz.LogClientOptions;
 import codes.grow.packages.signoz.SignozClient;
+import codes.grow.packages.signoz.logging.LogRecord;
+import codes.grow.packages.signoz.logging.WaitForLogOptions;
+import java.time.Duration;
+import java.util.Map;
 
 try (SignozClient client = SignozClient.fromEnv()) {
-    var health = client.health();
-    System.out.println(health.healthy() + " " + health.status());
-    System.out.println("latency ms: " + client.ping());
+    System.out.println(client.health().healthy() + " " + client.ping());
+    var logs = client.logClient(LogClientOptions.builder().serviceName("checkout").build());
+    logs.logger("orders").info("order placed", Map.of("order.id", 42));
+    logs.flush(Duration.ofSeconds(10));
+    LogRecord rec = client.query().waitForLog(
+        "service.name = 'checkout' AND body = 'order placed'",
+        WaitForLogOptions.of(Duration.ofSeconds(30), Duration.ofSeconds(1)));
+    System.out.println(rec.body() + " " + rec.attributes());
 }
 ```
 
@@ -171,10 +212,13 @@ All settings can be passed in code or through environment variables. Precedence:
 `GROW_SIGNOZ_*` variable > vendor variable > default.** A present but invalid value raises a
 `ConfigError` that names the variable (never its value).
 
-| Setting | Environment variable | Default |
+| Setting | Environment variables (in order) | Default |
 | - | - | - |
-| `url` | `GROW_SIGNOZ_URL` | service default |
-| `token` | `GROW_SIGNOZ_TOKEN` | none |
+| `url` — query API | `GROW_SIGNOZ_URL`, `SIGNOZ_URL` | `http://127.0.0.1:8080` |
+| `apiKey` — service-account key, sent as `SIGNOZ-API-KEY` (queries, `ping`, tail) | `GROW_SIGNOZ_API_KEY`, `SIGNOZ_API_KEY` | none |
+| `otlpEndpoint` — OTLP collector | `GROW_SIGNOZ_OTLP_ENDPOINT`, `SIGNOZ_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://127.0.0.1:4318` (HTTP), `http://127.0.0.1:4317` (gRPC) |
+| `otlpProtocol` — `http/protobuf` or `grpc` | `GROW_SIGNOZ_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` |
+| `ingestionKey` — SigNoz Cloud, sent as `signoz-ingestion-key` | `GROW_SIGNOZ_INGESTION_KEY`, `SIGNOZ_INGESTION_KEY` | none |
 | `connectTimeout` | `GROW_SIGNOZ_CONNECT_TIMEOUT` | 10 s |
 | `requestTimeout` (per attempt) | `GROW_SIGNOZ_REQUEST_TIMEOUT` | 30 s |
 | `totalTimeout` (including retries) | `GROW_SIGNOZ_TOTAL_TIMEOUT` | 120 s |
@@ -185,33 +229,89 @@ All settings can be passed in code or through environment variables. Precedence:
 | `proxy` | `GROW_SIGNOZ_PROXY` | none (environment proxies are ignored) |
 | `headers`, `userAgentSuffix`, `hooks`, `logger` | — | none |
 
-Vendor variables that are also read: `SIGNOZ_URL`, `SIGNOZ_API_KEY`, `SIGNOZ_OTLP_ENDPOINT`, `SIGNOZ_INGESTION_KEY` (cloud), `GROW_SIGNOZ_*`.
-
-Durations accept milliseconds (`1500`) or units (`500ms`, `10s`, `1m30s`); booleans accept
-`true/false/1/0/yes/no/on/off`. Field names follow each language's convention
-(`request_timeout` in Python and Rust, `RequestTimeout` in Go). The full reference is in the
-[documentation](https://grow-codes-packages.github.io/signoz/).
+Ingest (log client, `initTracing`) needs no API key. Durations accept milliseconds (`1500`) or
+units (`500ms`, `10s`, `1m30s`); booleans accept `true/false/1/0/yes/no/on/off`. Field names
+follow each language's convention (`api_key` in Python and Rust, `APIKey` in Go). The full
+reference is in the [documentation](https://grow-codes-packages.github.io/signoz/configuration/).
 
 ## Function overview
 
 <!-- service:function-overview — the service fills this section; keep the heading. -->
 
-The same functions exist in every language, named per language convention (`getString` in
-TypeScript and Java, `get_string` in Python and Rust, `GetString` in Go).
+The same functions exist in every language, named per language convention (`queryLogs` in
+TypeScript and Java, `query_logs` in Python and Rust, `QueryLogs` in Go). Every function has an
+example in all five languages on the [Functions](https://grow-codes-packages.github.io/signoz/functions/)
+pages.
 
-| Area | Functions | Description |
-| - | - | - |
-| Client | `health`, `ping`, `serverVersion`, `close` | liveness, authenticated round trip, server version, shutdown |
-| Logging | `send`, `sendBatch`, `flush`, `close`, `stats`, `logger`, `search`, `tail`, `listStreams`, `listLabels`, `waitForLog` | log shipping and querying |
-| Tracing | `initTracing`, `withSpan`, `traced`, `inject`, `extract`, `getTrace`, `searchTraces`, `listServices`, `listOperations`, `getDependencies`, `waitForTrace` | OpenTelemetry setup and trace queries |
+### Client
+
+| Function | Description |
+| - | - |
+| `fromEnv`, `health`, `ping`, `serverVersion`, `close` | config from the environment, unauthenticated liveness, authenticated round trip, server version (`UNSUPPORTED` on the community image, which reports none), idempotent shutdown that flushes log clients and tracing; later calls raise `CANCELLED` |
+
+| TypeScript | Rust | Go | Python | Java |
+| - | - | - | - | - |
+| `await client.ping()` | `client.ping().await?` | `client.Ping(ctx)` | `client.ping()` | `client.ping()` |
+
+### Ingest (OTLP to the collector)
+
+| Function | Description |
+| - | - |
+| `logClient` / `createLogClient` | batching log client (queue, drop policy, gzip, redaction, trace correlation, `stats()`), logger facade and framework adapters |
+| log exporter | `SignozLogExporter` / `OtlpLogExporter` / `NewOTLPLogExporter`: OTLP/HTTP protobuf or OTLP/gRPC, ingestion key, partial success |
+| `initTracing` | OpenTelemetry tracing with the OTLP exporter for the collector, plus span helpers, propagation and middleware |
+
+| TypeScript | Rust | Go | Python | Java |
+| - | - | - | - | - |
+| `client.logClient({ serviceName: "api" })` | `client.log_client(LogOptions::service("api"))?` | `client.NewLogClient(signoz.LogOptions{ServiceName: "api"})` | `client.log_client(service_name="api")` | `client.logClient(LogClientOptions.builder().serviceName("api").build())` |
+| `client.initTracing({ serviceName: "api" })` | `client.init_tracing(TracingConfig::new("api"))?` | `client.InitTracing(ctx, signoz.TracingConfig{ServiceName: "api"})` | `client.init_tracing("api")` | `client.initTracing(TracingConfig.builder("api").build())` |
+
+### Logs (query API)
+
+| Function | Description |
+| - | - |
+| `queryLogs` | raw log query (v5 `query_range`) with filter, window, limit, order, selected fields and a lossless keyset cursor |
+| `search`, `tail`, `listStreams`, `listLabels`, `waitForLog` | the shared `LogQueryClient`: search, SSE live tail with reconnect and de-duplication, services, field names, test helper |
+| `listLogFields`, `listFieldValues` | field keys (name, context, type) and values |
+
+| TypeScript | Rust | Go | Python | Java |
+| - | - | - | - | - |
+| `client.query.queryLogs({ filter, limit: 100 })` | `q.query_logs(LogQuery::new(filter).limit(100)).await?` | `q.QueryLogs(ctx, signoz.LogQuery{Filter: f, Limit: 100})` | `client.query.query_logs(f, limit=100)` | `q.queryLogs(LogQuery.builder().filter(f).limit(100).build())` |
+
+### Traces (query API)
+
+| Function | Description |
+| - | - |
+| `queryTraces` | raw span query (service, operation, filter, offset paging) |
+| `getTrace` | full trace from the waterfall (`null`/`None` when unknown; large traces completed with span queries) |
+| `searchTraces`, `listServices`, `listOperations`, `getDependencies`, `waitForTrace` | the shared `TraceQueryClient` |
+
+| TypeScript | Rust | Go | Python | Java |
+| - | - | - | - | - |
+| `await client.traces.getTrace(id)` | `q.get_trace(&id).await?` | `q.GetTrace(ctx, id)` | `client.traces.get_trace(id)` | `q.getTrace(id)` |
+
+### Aggregate, raw queries and filters
+
+| Function | Description |
+| - | - |
+| `aggregate` | builder for count, count distinct, sum, avg, min, max, percentiles; group by, order, limit; scalar or time series; aliases mapped back from `__result_<i>` |
+| `queryRange` | raw `POST /api/v5/query_range` body (formulas, PromQL, ClickHouse SQL) → data + warnings |
+| `FilterBuilder` | safe SigNoz filter expressions (`service.name = 'x' AND severity_text IN (...)`), `andFilters`, quoting helpers |
+
+| TypeScript | Rust | Go | Python | Java |
+| - | - | - | - | - |
+| `client.query.aggregate("traces").count("n").p99("duration_nano", "p99").groupBy("name").run()` | `q.aggregate(AggregateBuilder::new(Signal::Traces).count("n").percentile(99, "duration_nano", "p99").group_by(["name"])).await?` | `q.Aggregate(ctx, signoz.NewAggregate(signoz.SignalTraces).Count("n").Percentile(99, "duration_nano", "p99").GroupBy("name").Query())` | `client.query.aggregate("traces").count("n").p99("duration_nano", "p99").group_by("name").run()` | `q.aggregate(Signal.TRACES).count("n").percentile(99, "duration_nano", "p99").groupBy("name").run()` |
+| `new FilterBuilder().eq("service.name", "api").build()` | `FilterBuilder::new().eq("service.name", "api").build()?` | `signoz.NewFilter().Eq("service.name", "api").Build()` | `FilterBuilder().eq("service.name", "api").build()` | `FilterBuilder.create().eq("service.name", "api").build()` |
 
 <!-- /service:function-overview -->
 
 ## Testing with Docker
 
-The integration suite runs every public function against a real SigNoz (`signoz/signoz-community:v0.150.0 (+ signoz-otel-collector + ClickHouse)`) in Docker.
-Each language package is packed and installed into a separate consumer project first, so the tests
-use the package exactly as you would.
+The integration suite runs every public function against a real SigNoz stack in Docker
+(`docker/compose.service.yml`: SigNoz `v0.150.0`, the SigNoz OTel Collector and ClickHouse, plus a
+one-shot `bootstrap` that creates the admin user, a `signoz-viewer` service account and its API
+key). Each language package is packed and installed into a separate consumer project first, so the
+tests use the package exactly as you would; then the shared conformance scenarios run.
 
 ```sh
 make test-docker                     # all five languages
@@ -219,8 +319,9 @@ make test-docker LANGS="go python"   # a subset
 ```
 
 No host ports are published and every run uses its own Compose project, so runs never collide; the
-stack is always removed afterwards (`docker compose down -v`). Unit tests need no Docker:
-`make test` or `make coverage`.
+stack is always removed afterwards (`docker compose down -v`). The stack is healthy after about
+one minute and needs less than 1 GiB of RAM. Unit tests need no Docker: `make test` or
+`make coverage`.
 
 ## Compatibility
 
@@ -228,10 +329,13 @@ stack is always removed afterwards (`docker compose down -v`). Unit tests need n
 | - | - | - | - | - | - |
 | Runtime | Node.js ≥ 22.12, ESM + CJS | stable, MSRV 1.88 | 1.26, 1.27 | 3.10 – 3.14 | 17, 21, 25 |
 | Async | `Promise` + `AbortSignal` | `async` (tokio), `blocking` feature | `context.Context` | sync + `asyncio` | sync + `CompletableFuture` |
-| SigNoz | `signoz/signoz-community:v0.150.0 (+ signoz-otel-collector + ClickHouse)` | `signoz/signoz-community:v0.150.0 (+ signoz-otel-collector + ClickHouse)` | `signoz/signoz-community:v0.150.0 (+ signoz-otel-collector + ClickHouse)` | `signoz/signoz-community:v0.150.0 (+ signoz-otel-collector + ClickHouse)` | `signoz/signoz-community:v0.150.0 (+ signoz-otel-collector + ClickHouse)` |
+| OTLP logs | HTTP protobuf + gRPC | HTTP protobuf + gRPC | HTTP protobuf + gRPC | HTTP protobuf + gRPC | HTTP protobuf + gRPC |
+| Log adapters | pino, winston | `tracing` layer, `log` | `slog`, zap | `logging`, structlog | Logback, Log4j2, JUL |
+| SigNoz | `v0.150.0` | `v0.150.0` | `v0.150.0` | `v0.150.0` | `v0.150.0` |
 
-Functions that SigNoz (or its emulator) cannot serve are listed with the reason in
-[docs/compatibility.md](docs/compatibility.md).
+Functions that the community stack cannot serve (SigNoz Cloud ingestion key, very large traces,
+server version) and the few documented language differences (tracing protocol defaults,
+`insecureSkipVerify` over gRPC) are listed in [docs/compatibility.md](docs/compatibility.md).
 
 ## Contributing
 

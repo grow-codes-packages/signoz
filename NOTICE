@@ -59,3 +59,39 @@ copyright and licence.
 
   CODE_OF_CONDUCT.md is adapted from the Contributor Covenant, version 2.1,
   https://www.contributor-covenant.org, licensed under CC BY 4.0.
+
+  OTLP protocol (all five packages). OTLP log export requests
+  (ExportLogsServiceRequest) and responses follow the OpenTelemetry protocol
+  specification and opentelemetry-proto (Copyright The OpenTelemetry Authors,
+  Apache-2.0, https://github.com/open-telemetry/opentelemetry-proto). TypeScript
+  serializes them with @opentelemetry/otlp-transformer, Rust with the
+  opentelemetry-proto crate (prost/tonic), Go with go.opentelemetry.io/proto/otlp,
+  Python with the opentelemetry-proto package; the Java package contains a
+  minimal protobuf encoder/decoder written for this SDK that uses the message
+  and field numbers of opentelemetry-proto logs v1 (no code copied). The gRPC
+  method name opentelemetry.proto.collector.logs.v1.LogsService/Export is taken
+  from the same protos.
+
+  Spans are exported with the official OpenTelemetry SDKs and OTLP exporters
+  of each language (Apache-2.0): @opentelemetry/exporter-trace-otlp-proto and
+  -otlp-grpc with @grpc/grpc-js for TypeScript; opentelemetry-otlp for Rust;
+  go.opentelemetry.io/otel/exporters/otlp/otlptrace for Go;
+  opentelemetry-exporter-otlp-proto-http (and the optional -proto-grpc) for
+  Python; io.opentelemetry:opentelemetry-exporter-otlp for Java (gRPC log
+  export over OkHttp, Apache-2.0).
+
+  SigNoz query API. Request bodies and response field names of the SigNoz
+  query service (/api/v5/query_range, /api/v4/traces/{id}/waterfall,
+  /api/v3/logs/livetail, /api/v1/fields/*, /api/v1/dependency_graph, health and
+  version) and the SIGNOZ-API-KEY / signoz-ingestion-key header names were
+  taken from the public SigNoz documentation and from responses of the
+  signoz/signoz-community:v0.150.0 container (SigNoz core, MIT licence,
+  Copyright SigNoz, Inc.). No SigNoz code is copied and no enterprise (ee/)
+  endpoint is used. Note: the community image reports an empty server version,
+  so serverVersion() raises UNSUPPORTED against it.
+
+  Notable other runtime dependencies of the service code: undici (MIT) for
+  TypeScript; reqwest, tonic, prost and base64 (MIT OR Apache-2.0) for Rust;
+  google.golang.org/grpc (Apache-2.0) for Go; httpx (BSD-3-Clause), protobuf
+  (BSD-3-Clause) and the optional grpcio (Apache-2.0) for Python;
+  jackson-databind and okhttp (Apache-2.0) for Java.

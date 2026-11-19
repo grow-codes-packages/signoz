@@ -1,0 +1,33 @@
+{
+  "status": "success",
+  "data": {
+    "type": "trace",
+    "meta": {
+      "rowsScanned": 26,
+      "bytesScanned": 1808,
+      "durationMs": 39,
+      "stepIntervals": {
+        "A": 10
+      }
+    },
+    "data": {
+      "results": [
+        {
+          "queryName": "A",
+          "nextCursor": "",
+          "rows": [
+            {
+              "data": {
+                "duration_nano": 150000000,
+                "name": "GET /verify",
+                "service.name": "sdk-fe67ae4b",
+                "span_count": 3,
+                "trace_id": "fe67ae4bfe67ae4bfe67ae4bfe67ae4b"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "data": {
+    "type": "raw",
+    "meta": {
+      "rowsScanned": 22,
+      "bytesScanned": 1131,
+      "durationMs": 46,
+      "stepIntervals": {
+        "A": 10
+      }
+    },
+    "warning": {
+      "message": "Encountered warnings",
+      "warnings": [
+        {
+          "message": "key `nosuchfield_fe67ae4b` not found in metadata; querying the underlying data directly. If this is unexpected, check the key name for typos."
+        }
+      ]
+    },
+    "data": {
+      "results": [
+        {
+          "queryName": "A",
+          "nextCursor": "",
+          "rows": null
+        }
+      ]
+    }
+  }
+}

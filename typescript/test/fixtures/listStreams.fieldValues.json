@@ -1,0 +1,9 @@
+{
+  "status": "success",
+  "data": {
+    "values": {
+      "stringValues": ["lat-fe67ae4b", "tg-httppb-fe67ae4b", "sdk-fe67ae4b", "tg-grpc-fe67ae4b"]
+    },
+    "complete": true
+  }
+}
