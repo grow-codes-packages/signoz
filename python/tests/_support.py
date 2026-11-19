@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import atexit
 import dataclasses
 import json
 import socket
@@ -80,7 +81,7 @@ class MockServer:
                 except (BrokenPipeError, ConnectionResetError):
                     pass
 
-            do_GET = do_POST = do_PUT = do_DELETE = do_HEAD = _handle
+            do_GET = do_POST = do_PUT = do_PATCH = do_DELETE = do_HEAD = do_OPTIONS = _handle
 
         self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.httpd.daemon_threads = True
@@ -115,11 +116,21 @@ def make_config(url: str, **kw: Any) -> sdk.SignozConfig:
     return sdk.SignozConfig(url=url, **kw)
 
 
+_REFUSING: list[socket.socket] = []
+atexit.register(lambda: [sock.close() for sock in _REFUSING])
+
+
 def closed_port_url() -> str:
+    """URL of a port that refuses connections.
+
+    The socket stays bound (never listening) for the whole test session: connects are refused,
+    and no other server (a parallel MockServer, another process) can take the port meanwhile,
+    which a bind-then-close port would allow.
+    """
     sock = socket.socket()
     sock.bind(("127.0.0.1", 0))
+    _REFUSING.append(sock)
     port = sock.getsockname()[1]
-    sock.close()
     return f"http://127.0.0.1:{port}"
 
 
