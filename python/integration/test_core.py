@@ -35,9 +35,12 @@ def test_ping(client: sdk.SignozClient) -> None:
 def test_server_version(client: sdk.SignozClient) -> None:
     """Community image reports "" → UNSUPPORTED; a later image may return a version."""
     try:
-        assert client.server_version().strip()
+        version = client.server_version()
     except sdk.UnsupportedError as err:
-        assert err.code == sdk.ErrorCode.UNSUPPORTED
+        code = err.code
+        assert code == sdk.ErrorCode.UNSUPPORTED
+    else:
+        assert version.strip()
 
 
 def test_close_is_idempotent(env: dict[str, str]) -> None:

@@ -28,10 +28,10 @@ Trademarks
 -------------------------------------------------------------------------------
 
 This project is an independent, community-maintained client library. It is not
-affiliated with, endorsed or sponsored by SigNoz, Inc..
-SigNoz is a trademark of SigNoz, Inc.. All other product names, logos and
-brands are the property of their respective owners and are used for
-identification purposes only.
+affiliated with, endorsed or sponsored by the owner of SigNoz
+(SigNoz, Inc.). SigNoz is a trademark of its owner (SigNoz, Inc.);
+all other product names, logos and brands are the property of their respective
+owners and are used for identification purposes only.
 
 The SigNoz server itself is licensed separately by its owner:
 MIT core + SigNoz Enterprise licence (`ee/`).

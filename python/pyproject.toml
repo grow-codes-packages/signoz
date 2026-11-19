@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 license = "Apache-2.0"
 authors = [{ name = "Grow Codes", email = "opensource@grow.codes" }]
 maintainers = [{ name = "Grow Codes", email = "opensource@grow.codes" }]
-keywords = ["grow-codes", "sdk", "signoz", "logging,tracing"]
+keywords = ["grow-codes", "sdk", "signoz", "logging", "tracing", "opentelemetry"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -55,6 +55,7 @@ dev = [
   "ruff>=0.8",
   "mypy>=1.13",
   "pip-licenses>=5.0",
+  "twine>=6.1",
   "mkdocs>=1.6",
   "mkdocstrings[python]>=0.27",
   "opentelemetry-exporter-otlp-proto-grpc>=1.27,<2",
@@ -100,6 +101,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S", "PLC0415", "N802", "B017", "PT011", "PT018", "N815", "RUF001", "RUF012", "SIM117"]
+"integration/**" = ["S", "PLC0415", "N802", "B017", "PT011", "PT018", "N815", "RUF001", "RUF012", "SIM117"]
 "tools/**" = ["S"]
 
 [tool.ruff.format]

@@ -356,7 +356,7 @@ Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE) 
 ## Trademarks and disclaimer
 
 This is an independent, community-maintained project. It is **not affiliated with, endorsed or
-sponsored by SigNoz, Inc.**. SigNoz is a trademark of SigNoz, Inc.; it is used here only to name the
+sponsored by its owner (SigNoz, Inc.)**. SigNoz is a trademark of SigNoz, Inc.; it is used here only to name the
 service this SDK connects to. The SigNoz server is licensed separately by its owner
 (MIT core + SigNoz Enterprise licence (`ee/`)).
 
