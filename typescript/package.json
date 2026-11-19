@@ -1,6 +1,6 @@
 {
   "name": "@grow-codes/signoz",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Grow Codes SDK for SigNoz (TypeScript)",
   "keywords": [
     "signoz",
