@@ -128,7 +128,10 @@ function readPem(path: string | undefined): Buffer | undefined {
 
 /** Appends `/v1/<signal>` to an OTLP/HTTP base endpoint unless it already ends with it. */
 export function otlpHttpUrl(endpoint: string, signal: "logs" | "traces"): string {
-  const base = endpoint.replace(/\/+$/, "");
+  // Strip trailing slashes with a loop, not a regex (no backtracking on long runs of "/").
+  let end = endpoint.length;
+  while (end > 0 && endpoint.charCodeAt(end - 1) === 47) end -= 1;
+  const base = endpoint.slice(0, end);
   return base.endsWith(`/v1/${signal}`) ? base : `${base}/v1/${signal}`;
 }
 
