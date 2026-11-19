@@ -128,7 +128,10 @@ function readPem(path: string | undefined): Buffer | undefined {
 
 /** Appends `/v1/<signal>` to an OTLP/HTTP base endpoint unless it already ends with it. */
 export function otlpHttpUrl(endpoint: string, signal: "logs" | "traces"): string {
-  const base = endpoint.replace(/\/+$/, "");
+  // Strip trailing slashes with a loop, not a regex (no backtracking on long runs of "/").
+  let end = endpoint.length;
+  while (end > 0 && endpoint.charCodeAt(end - 1) === 47) end -= 1;
+  const base = endpoint.slice(0, end);
   return base.endsWith(`/v1/${signal}`) ? base : `${base}/v1/${signal}`;
 }
 
@@ -141,7 +144,7 @@ export function endpointFor(config: SignozConfig, protocol: OtlpProtocol): strin
   const url = new URL(config.otlpEndpoint);
   if (protocol === "grpc" && url.port === "4318") url.port = "4317";
   else if (protocol === "http/protobuf" && url.port === "4317") url.port = "4318";
-  return url.toString().replace(/\/+$/, "");
+  return stripTrailingSlashes(url.toString());
 }
 
 /** Headers for OTLP exports: config headers, extra headers and the Cloud ingestion key. */
@@ -174,7 +177,7 @@ export class SignozLogExporter implements LogExporter {
   constructor(config: SignozConfig, options: SignozLogExporterOptions = {}) {
     this.#config = config;
     this.protocol = options.protocol ?? config.otlpProtocol;
-    this.endpoint = (options.endpoint ?? endpointFor(config, this.protocol)).replace(/\/+$/, "");
+    this.endpoint = stripTrailingSlashes(options.endpoint ?? endpointFor(config, this.protocol));
     this.#headers = otlpHeaders(config, options.headers);
     this.#scopeName = options.scopeName ?? `@grow-codes/${PACKAGE_KEY}`;
     if (this.protocol === "http/protobuf") {
@@ -335,4 +338,11 @@ export class SignozLogExporter implements LogExporter {
     this.#grpc?.close();
     await this.#transport?.close();
   }
+}
+
+/** Removes trailing "/" characters with a loop (no regex backtracking on long runs of "/"). */
+function stripTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) end -= 1;
+  return value.slice(0, end);
 }
