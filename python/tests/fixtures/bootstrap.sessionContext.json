@@ -1,0 +1,20 @@
+{
+  "status": "success",
+  "data": {
+    "exists": true,
+    "orgs": [
+      {
+        "id": "01a1f051-bf37-7ed8-93eb-b06fd728fd90",
+        "name": "default",
+        "authNSupport": {
+          "callback": [],
+          "password": [
+            {
+              "provider": "email_password"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

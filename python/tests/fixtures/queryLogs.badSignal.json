@@ -1,0 +1,10 @@
+{
+  "status": "error",
+  "error": {
+    "type": "invalid-input",
+    "code": "invalid_input",
+    "message": "unsupported signal \"nope\"",
+    "errors": [],
+    "suggestions": []
+  }
+}

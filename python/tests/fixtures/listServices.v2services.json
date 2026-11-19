@@ -1,0 +1,73 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "serviceName": "sdk-fe67ae4b",
+      "p99": 150000000,
+      "avgDuration": 150000000,
+      "numCalls": 1,
+      "callRate": 0.0002777777777777778,
+      "numErrors": 0,
+      "errorRate": 0,
+      "num4XX": 0,
+      "fourXXRate": 0,
+      "dataWarning": {
+        "topLevelOps": [
+          "overflow_operation",
+          "GET /verify"
+        ]
+      }
+    },
+    {
+      "serviceName": "sdk-db-fe67ae4b",
+      "p99": 98000000,
+      "avgDuration": 98000000,
+      "numCalls": 1,
+      "callRate": 0.0002777777777777778,
+      "numErrors": 0,
+      "errorRate": 0,
+      "num4XX": 0,
+      "fourXXRate": 0,
+      "dataWarning": {
+        "topLevelOps": [
+          "overflow_operation",
+          "SELECT users"
+        ]
+      }
+    },
+    {
+      "serviceName": "tg-grpc-fe67ae4b",
+      "p99": 123000,
+      "avgDuration": 123000,
+      "numCalls": 2,
+      "callRate": 0.0005555555555555556,
+      "numErrors": 0,
+      "errorRate": 0,
+      "num4XX": 0,
+      "fourXXRate": 0,
+      "dataWarning": {
+        "topLevelOps": [
+          "overflow_operation",
+          "lets-go"
+        ]
+      }
+    },
+    {
+      "serviceName": "tg-httppb-fe67ae4b",
+      "p99": 123000,
+      "avgDuration": 123000,
+      "numCalls": 2,
+      "callRate": 0.0005555555555555556,
+      "numErrors": 0,
+      "errorRate": 0,
+      "num4XX": 0,
+      "fourXXRate": 0,
+      "dataWarning": {
+        "topLevelOps": [
+          "overflow_operation",
+          "lets-go"
+        ]
+      }
+    }
+  ]
+}

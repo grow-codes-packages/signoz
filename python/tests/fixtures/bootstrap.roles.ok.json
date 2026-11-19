@@ -1,0 +1,41 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "01a1f051-bf67-7468-a97e-c78e92dda16e",
+      "createdAt": "2026-11-18T20:20:51.687289Z",
+      "updatedAt": "2026-11-18T20:20:51.687289Z",
+      "name": "signoz-admin",
+      "description": "Role assigned to users who have full administrative access to SigNoz resources.",
+      "type": "managed",
+      "orgId": "01a1f051-bf37-7ed8-93eb-b06fd728fd90"
+    },
+    {
+      "id": "01a1f051-bf67-74ec-8ebd-fdebf00636e6",
+      "createdAt": "2026-11-18T20:20:51.687322Z",
+      "updatedAt": "2026-11-18T20:20:51.687322Z",
+      "name": "signoz-editor",
+      "description": "Role assigned to users who can create, edit, and manage SigNoz resources but do not have full administrative privileges.",
+      "type": "managed",
+      "orgId": "01a1f051-bf37-7ed8-93eb-b06fd728fd90"
+    },
+    {
+      "id": "01a1f051-bf67-7520-aa25-86511a67b925",
+      "createdAt": "2026-11-18T20:20:51.687336Z",
+      "updatedAt": "2026-11-18T20:20:51.687336Z",
+      "name": "signoz-viewer",
+      "description": "Role assigned to users who have read-only access to SigNoz resources.",
+      "type": "managed",
+      "orgId": "01a1f051-bf37-7ed8-93eb-b06fd728fd90"
+    },
+    {
+      "id": "01a1f051-bf67-7524-b48b-e3de016879b4",
+      "createdAt": "2026-11-18T20:20:51.687337Z",
+      "updatedAt": "2026-11-18T20:20:51.687337Z",
+      "name": "signoz-anonymous",
+      "description": "Role assigned to anonymous users for access to public resources.",
+      "type": "managed",
+      "orgId": "01a1f051-bf37-7ed8-93eb-b06fd728fd90"
+    }
+  ]
+}

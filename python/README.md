@@ -4,16 +4,31 @@ Python SDK for [SigNoz](https://grow-codes-packages.github.io/signoz/) by Grow C
 Unofficial and community maintained; "SigNoz" is a trademark of SigNoz, Inc..
 
 ```bash
-pip install grow-signoz
+pip install grow-signoz          # OTLP/HTTP
+pip install "grow-signoz[grpc]"  # + OTLP/gRPC
 ```
 
 ```python
-from grow_signoz import SignozClient, SignozConfig
+from grow_signoz import FilterBuilder, LogInput, Severity, SignozClient
 
-# Reads GROW_SIGNOZ_URL, GROW_SIGNOZ_TOKEN, ... from the environment.
+# Reads GROW_SIGNOZ_URL / SIGNOZ_URL, SIGNOZ_API_KEY, SIGNOZ_OTLP_ENDPOINT, ... from the environment.
 with SignozClient.from_env() as client:
     print(client.health())
-    print(client.server_version())
+
+    logs = client.log_client(service_name="checkout")          # OTLP to the collector
+    logs.send(LogInput("payment failed", severity=Severity.ERROR, attributes={"order": 42}))
+    logs.flush(10)
+
+    flt = FilterBuilder().eq("service.name", "checkout").in_("severity_text", ["ERROR"])
+    page = client.query.query_logs(flt, limit=50)               # /api/v5/query_range
+    for record in page.records:
+        print(record.timestamp, record.body)
+
+    tracing = client.init_tracing("checkout", set_global=False)  # OpenTelemetry → collector
+    with tracing.tracer("app").start_as_current_span("charge"):
+        pass
+    tracing.force_flush(10)
+    print(client.traces.list_services())
 ```
 
 The async client has the same methods:
@@ -25,6 +40,7 @@ from grow_signoz import AsyncSignozClient
 async def main() -> None:
     async with AsyncSignozClient.from_env() as client:
         print(await client.health())
+        print(await client.query.query_logs("timeout", limit=10))
 
 asyncio.run(main())
 ```

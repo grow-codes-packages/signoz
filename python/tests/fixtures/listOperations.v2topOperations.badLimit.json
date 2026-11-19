@@ -1,0 +1,10 @@
+{
+  "status": "error",
+  "error": {
+    "type": "invalid-input",
+    "code": "invalid_input",
+    "message": "limit must be between 1 and 5000",
+    "errors": [],
+    "suggestions": []
+  }
+}
