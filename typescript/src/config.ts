@@ -134,12 +134,12 @@ export class SignozConfig implements CommonConfig {
       throw new ConfigError("invalid configuration: otlpProtocol must be http/protobuf or grpc");
     }
     this.otlpProtocol = protocol as OtlpProtocol;
-    this.otlpEndpoint = (
+    this.otlpEndpoint = stripTrailingSlashes(
       options.otlpEndpoint?.trim() ||
-      (this.otlpProtocol === "grpc"
-        ? SignozConfig.DEFAULT_OTLP_GRPC_ENDPOINT
-        : SignozConfig.DEFAULT_OTLP_HTTP_ENDPOINT)
-    ).replace(/\/+$/, "");
+        (this.otlpProtocol === "grpc"
+          ? SignozConfig.DEFAULT_OTLP_GRPC_ENDPOINT
+          : SignozConfig.DEFAULT_OTLP_HTTP_ENDPOINT),
+    );
     this.validate();
     Object.freeze(this);
   }
@@ -221,4 +221,11 @@ export class SignozConfig implements CommonConfig {
   [INSPECT](): string {
     return this.toString();
   }
+}
+
+/** Removes trailing "/" characters with a loop (no regex backtracking on long runs of "/"). */
+function stripTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) end -= 1;
+  return value.slice(0, end);
 }
