@@ -84,7 +84,7 @@
     },
     {
       "path": ".github/workflows/release.yml",
-      "sha256": "ee44873e941129220a548efe9e73b3d98619243f7fd7c9e276ad27e3baebe8cb",
+      "sha256": "08fe94e11eb7ac23e8fe17d5a39fcc2b299ba4a607b19c96de5b35509824ef24",
       "generated": true
     },
     {
@@ -1508,7 +1508,7 @@
     },
     {
       "path": "python/Makefile",
-      "sha256": "407d581494d129d658778007ab89f4178ccf0d17deb1194be0000800f909643e",
+      "sha256": "ace2836708fa911728da09edf9984de99498b3d4f1bab8b0d68d30ae5fefd377",
       "generated": false
     },
     {
