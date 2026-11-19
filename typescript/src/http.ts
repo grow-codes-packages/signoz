@@ -1,6 +1,7 @@
 // Service-owned: SigNoz HTTP conventions shared by the query modules.
 
 import {
+  CancelledError,
   ConfigError,
   type HttpTransport,
   type QueryValue,
@@ -82,6 +83,8 @@ export class SignozApi {
 
   /** Calls the API and returns the decoded payload (or `null` on 404 with `nullOn404`). */
   async call<T>(path: string, options: ApiCallOptions): Promise<ApiResult<T> | null> {
+    // Same in every language: any call on a closed client raises CANCELLED.
+    if (this.#transport.closed) throw new CancelledError(`${options.operation}: client is closed`);
     const headers = options.auth === false ? {} : this.authHeaders(options.operation);
     const method = options.method ?? "GET";
     const res = await this.#transport.request<string>({

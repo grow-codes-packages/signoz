@@ -5,8 +5,19 @@
 
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
-import { SignozClient, SignozConfig, createLogClient, initTracing, type BatchOptions } from "@grow-codes/signoz";
-import { formatReport, runConformance, type LoggingTarget, type TracingTarget } from "@grow-codes/signoz/testing";
+import {
+  SignozClient,
+  SignozConfig,
+  createLogClient,
+  initTracing,
+  type BatchOptions,
+} from "@grow-codes/signoz";
+import {
+  formatReport,
+  runConformance,
+  type LoggingTarget,
+  type TracingTarget,
+} from "@grow-codes/signoz/testing";
 import { loadBootstrapEnv, scenariosDir } from "./env.ts";
 
 let query: SignozClient;
@@ -60,7 +71,10 @@ test("conformance: tracing", async () => {
     categories: ["tracing"],
     factories: {
       tracing: (ctx): TracingTarget => ({
-        handle: initTracing({ serviceName: `conformance-traces-${ctx.run}`, signoz: SignozConfig.fromEnv() }),
+        handle: initTracing({
+          serviceName: `conformance-traces-${ctx.run}`,
+          signoz: SignozConfig.fromEnv(),
+        }),
         query: query.traces,
       }),
     },

@@ -31,11 +31,13 @@ def signoz_tracing_config(
 ) -> TracingConfig:
     """Merge SigNoz defaults under a :class:`TracingConfig`.
 
-    ``config`` may be a ``TracingConfig`` or just the service name (the protocol then defaults
-    to ``signoz.otlp_protocol``). The endpoint defaults to the configured collector endpoint for
-    the protocol (4318 ↔ 4317 swapped when the protocols differ), headers get the
-    ``signoz-ingestion-key`` (explicit headers win) and TLS defaults to ``signoz.tls``.
-    ``signoz`` defaults to :meth:`SignozConfig.from_env`.
+    ``config`` may be a ``TracingConfig`` or just the service name. Without an explicit
+    ``endpoint``, the protocol is ``signoz.otlp_protocol`` unless the tracing config picks
+    ``grpc`` (``http/protobuf`` is the ``TracingConfig`` default and cannot be told apart from
+    "unset", so it follows the SigNoz config — same rule as Rust and Java). The endpoint defaults
+    to the configured collector endpoint for the protocol (4318 ↔ 4317 swapped when the
+    protocols differ), headers get the ``signoz-ingestion-key`` (explicit headers win) and TLS
+    defaults to ``signoz.tls``. ``signoz`` defaults to :meth:`SignozConfig.from_env`.
     """
     cfg = signoz or SignozConfig.from_env()
     if isinstance(config, str):
@@ -45,9 +47,13 @@ def signoz_tracing_config(
         tracing = dataclasses.replace(config, **overrides) if overrides else config
     if tracing.protocol == "native":
         raise ConfigError("tracing: SigNoz has no native trace protocol; use http/protobuf or grpc")
-    endpoint = tracing.endpoint or endpoint_for(cfg, tracing.protocol)
+    protocol = tracing.protocol
+    if not tracing.endpoint and protocol == "http/protobuf":
+        protocol = cfg.otlp_protocol
+    endpoint = tracing.endpoint or endpoint_for(cfg, protocol)
     return dataclasses.replace(
         tracing,
+        protocol=protocol,
         endpoint=endpoint,
         headers={**otlp_headers(cfg), **dict(tracing.headers)},
         tls=tracing.tls or cfg.tls,

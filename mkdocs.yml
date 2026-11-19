@@ -117,7 +117,14 @@ nav:
   - Quickstart: quickstart.md
   - Configuration: configuration.md
   - Client: client.md
-  - Functions: functions.md
+  - Functions:
+      - functions.md
+      - Client and status: functions/client.md
+      - Ingest: functions/ingest.md
+      - Logs: functions/logs.md
+      - Traces: functions/traces.md
+      - Aggregate and raw queries: functions/aggregate.md
+      - FilterBuilder: functions/filter.md
   - Logging: logging.md
   - Tracing: tracing.md
   - Error handling: errors.md

@@ -286,7 +286,14 @@ describe("SignozClient", () => {
     await client.health();
     await client.close();
     await client.close();
-    await expect(client.ping()).rejects.toMatchObject({ code: "CONFIG" });
+    // every call on a closed client raises CANCELLED (same in all languages)
+    await expect(client.ping()).rejects.toMatchObject({ code: "CANCELLED" });
+    await expect(client.health()).rejects.toMatchObject({ code: "CANCELLED" });
+    await expect(client.serverVersion()).rejects.toMatchObject({ code: "CANCELLED" });
+    await expect(client.query.queryLogs()).rejects.toMatchObject({ code: "CANCELLED" });
+    expect(() => client.logClient()).toThrow(/client is closed/);
+    expect(() => client.initTracing({ serviceName: "svc" })).toThrow(/client is closed/);
+    expect(() => client.logs.tail("", () => undefined)).toThrow(/client is closed/);
   });
 
   it("fromEnv builds from GROW_* variables", async () => {

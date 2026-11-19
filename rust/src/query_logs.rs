@@ -291,7 +291,7 @@ impl SignozQueryClient {
                 .collect();
             spec.insert("selectFields".into(), Value::Array(fields));
         }
-        let (raw, warnings) = self.query_range(op, "raw", start, end, spec).await?;
+        let (raw, warnings) = self.builder_query(op, "raw", start, end, spec).await?;
         let rows = rows_of(raw.as_ref());
         let mut out = LogQueryResult {
             records: rows.iter().map(log_record_from_row).collect(),

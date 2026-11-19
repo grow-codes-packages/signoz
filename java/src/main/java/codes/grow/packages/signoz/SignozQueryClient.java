@@ -142,27 +142,58 @@ public final class SignozQueryClient implements LogQueryClient, TraceQueryClient
     return api.call(op, TransportRequest.post("/api/v5/query_range").json(body), true)
         .thenApply(
             data -> {
-              List<String> warnings = new ArrayList<>();
-              JsonNode warning = data.path("warning");
-              if (warning.isObject()) {
-                for (JsonNode w2 : warning.path("warnings")) {
-                  String m = Rows.str(w2, "message");
-                  if (!m.isEmpty()) {
-                    warnings.add(api.redact(m));
-                  }
-                }
-                String m = Rows.str(warning, "message");
-                if (warnings.isEmpty() && !m.isEmpty()) {
-                  warnings.add(api.redact(m));
-                }
-                for (String w3 : warnings) {
-                  api.warn("signoz query warning", Map.of("operation", op, "warning", w3));
-                }
-              }
+              List<String> warnings = warnings(op, data);
               JsonNode results = data.path("data").path("results");
               JsonNode first = results.isArray() && results.size() > 0 ? results.get(0) : null;
               return new Range(first, warnings);
             });
+  }
+
+  /** Redacted warning messages of a query_range response (also logged). */
+  private List<String> warnings(String op, JsonNode data) {
+    List<String> warnings = new ArrayList<>();
+    JsonNode warning = data.path("warning");
+    if (warning.isObject()) {
+      for (JsonNode w2 : warning.path("warnings")) {
+        String m = Rows.str(w2, "message");
+        if (!m.isEmpty()) {
+          warnings.add(api.redact(m));
+        }
+      }
+      String m = Rows.str(warning, "message");
+      if (warnings.isEmpty() && !m.isEmpty()) {
+        warnings.add(api.redact(m));
+      }
+      for (String w3 : warnings) {
+        api.warn("signoz query warning", Map.of("operation", op, "warning", w3));
+      }
+    }
+    return warnings;
+  }
+
+  /**
+   * Posts a raw request body to {@code POST /api/v5/query_range} and returns the envelope's {@code
+   * data} plus the server warnings. It is the escape hatch for queries the typed helpers do not
+   * cover (formulas, PromQL, ClickHouse SQL, several queries at once).
+   *
+   * @param body the request body (a {@code Map}, record or {@code JsonNode}, encoded as JSON)
+   * @return data and warnings
+   */
+  public QueryRangeResult queryRange(Object body) {
+    return await(queryRangeAsync(body), "queryRange");
+  }
+
+  /**
+   * Asynchronous {@link #queryRange(Object)}.
+   *
+   * @param body the request body
+   * @return a future result
+   */
+  public CompletableFuture<QueryRangeResult> queryRangeAsync(Object body) {
+    return SignozApi.defer(
+        () ->
+            api.call("queryRange", TransportRequest.post("/api/v5/query_range").json(body), true)
+                .thenApply(data -> new QueryRangeResult(data, warnings("queryRange", data))));
   }
 
   private static List<JsonNode> rows(JsonNode result) {
@@ -199,11 +230,16 @@ public final class SignozQueryClient implements LogQueryClient, TraceQueryClient
             || !n.path("e").isIntegralNumber()
             || !n.path("m").isIntegralNumber()
             || !(o.equals("asc") || o.equals("desc"))
-            || !n.path("x").isArray()) {
+            || !(n.path("x").isArray() || n.path("x").isNull() || n.path("x").isMissingNode())) {
           throw new ValidationException(op + ": invalid cursor");
         }
         List<String> ids = new ArrayList<>();
-        n.path("x").forEach(x -> ids.add(x.asText()));
+        for (JsonNode x : n.path("x")) {
+          if (!x.isTextual()) {
+            throw new ValidationException(op + ": invalid cursor");
+          }
+          ids.add(x.asText());
+        }
         return new LogCursor(
             n.get("s").asLong(),
             n.get("e").asLong(),

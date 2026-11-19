@@ -244,7 +244,7 @@ impl SignozQueryClient {
         if query.offset > 0 {
             spec.insert("offset".into(), json!(query.offset));
         }
-        let (raw, warnings) = self.query_range(op, "raw", start, end, spec).await?;
+        let (raw, warnings) = self.builder_query(op, "raw", start, end, spec).await?;
         Ok(SpanQueryResult {
             spans: rows_of(raw.as_ref()).iter().map(span_from_raw).collect(),
             warnings,
@@ -359,7 +359,7 @@ impl SignozQueryClient {
             json!([{"key": {"name": "timestamp"}, "direction": "desc"}]),
         );
         spec.insert("limit".into(), json!(limit));
-        let (raw, _) = self.query_range(op, "trace", start, end, spec).await?;
+        let (raw, _) = self.builder_query(op, "trace", start, end, spec).await?;
         let summaries: Vec<TraceSummary> = rows_of(raw.as_ref())
             .iter()
             .filter_map(|row| {

@@ -205,9 +205,12 @@ func logRecordFromRow(row rawRow) LogRecord {
 		rec.Severity = Severity(n)
 	} else if s, ok := ParseSeverity(text); ok {
 		rec.Severity = s
+	} else {
+		// No (or an unknown) severity: INFO, as in every language.
+		rec.Severity = SeverityInfo
 	}
 	rec.SeverityText = text
-	if rec.SeverityText == "" && rec.Severity != SeverityUnspecified {
+	if rec.SeverityText == "" {
 		rec.SeverityText = rec.Severity.String()
 	}
 	if rec.TraceID != "" {

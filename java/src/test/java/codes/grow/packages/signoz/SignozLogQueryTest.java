@@ -161,6 +161,51 @@ class SignozLogQueryTest {
     assertThat(c.order()).isEqualTo(SortOrder.ASC);
   }
 
+  @Test
+  void queryRangePostsARawBody() {
+    server.enqueue(
+        200,
+        "{\"status\":\"success\",\"data\":{\"type\":\"scalar\",\"warning\":{\"warnings\":"
+            + "[{\"message\":\"w1\"}]},\"data\":{\"results\":[]}}}");
+    server.enqueue(200, "{\"status\":\"success\"}");
+    QueryRangeResult res =
+        client.query().queryRange(Map.of("start", 1, "end", 2, "requestType", "scalar"));
+    assertThat(res.warnings()).containsExactly("w1");
+    assertThat(res.data().path("type").asText()).isEqualTo("scalar");
+    JsonNode body = Fixtures.body(server.requests().get(0));
+    assertThat(body.path("requestType").asText()).isEqualTo("scalar");
+    assertThat(server.requests().get(0).header("SIGNOZ-API-KEY")).isEqualTo(Fixtures.KEY);
+    QueryRangeResult empty = client.query().queryRangeAsync(Map.of()).join();
+    assertThat(empty.data().isNull()).isTrue();
+    assertThat(empty.warnings()).isEmpty();
+    assertThat(new QueryRangeResult(null, null).warnings()).isEmpty();
+  }
+
+  @Test
+  void goCursorWithNullOrMissingIdsIsAccepted() {
+    // Go encodes an empty id list as "x": null; a missing "x" is accepted too.
+    SignozQueryClient.LogCursor nullIds =
+        SignozQueryClient.LogCursor.decode(
+            "t",
+            Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(
+                    "{\"v\":1,\"s\":1000,\"e\":5000,\"o\":\"asc\",\"m\":2000,\"x\":null}"
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+    assertThat(nullIds.ids()).isEmpty();
+    assertThat(nullIds.ms()).isEqualTo(2000);
+    SignozQueryClient.LogCursor missing =
+        SignozQueryClient.LogCursor.decode(
+            "t",
+            Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(
+                    "{\"v\":1,\"s\":1000,\"e\":5000,\"o\":\"desc\",\"m\":2000}"
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+    assertThat(missing.ids()).isEmpty();
+    assertThat(missing.order()).isEqualTo(SortOrder.DESC);
+  }
+
   private static String row(String id, String ts, String body) {
     return "{\"timestamp\":\""
         + ts
@@ -187,6 +232,15 @@ class SignozLogQueryTest {
             .encodeToString("{\"v\":2}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
     assertThatThrownBy(() -> q.queryLogs(LogQuery.builder().cursor(wrong).build()))
         .isInstanceOf(ValidationException.class);
+    String numericIds =
+        Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(
+                "{\"v\":1,\"s\":1,\"e\":5,\"o\":\"asc\",\"m\":2,\"x\":[1]}"
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    assertThatThrownBy(() -> q.queryLogs(LogQuery.builder().cursor(numericIds).build()))
+        .isInstanceOf(ValidationException.class)
+        .hasMessageContaining("invalid cursor");
     Instant t = Instant.parse("2026-11-18T20:00:00Z");
     assertThatThrownBy(() -> q.queryLogs(LogQuery.builder().start(t).end(t).build()))
         .isInstanceOf(ValidationException.class)

@@ -172,9 +172,57 @@ impl SignozQueryClient {
         Ok(value.get("data").cloned().unwrap_or(Value::Null))
     }
 
+    /// Posts a raw request body to `POST /api/v5/query_range` and returns the envelope's
+    /// `data` plus the server warnings (also logged at warn level). It is the escape hatch for
+    /// queries the typed helpers do not cover (formulas, PromQL, ClickHouse SQL, several
+    /// queries at once).
+    pub async fn query_range(&self, body: &Value) -> Result<QueryRangeResult> {
+        let op = "queryRange";
+        let data = self
+            .call(
+                op,
+                Method::POST,
+                "/api/v5/query_range",
+                &[],
+                Some(body),
+                true,
+            )
+            .await?;
+        let warnings = self.warnings(op, &data);
+        Ok(QueryRangeResult { data, warnings })
+    }
+
+    /// Redacted warning messages of a query_range response (also logged).
+    fn warnings(&self, op: &str, data: &Value) -> Vec<String> {
+        let mut warnings = Vec::new();
+        if let Some(w) = data.get("warning").filter(|w| w.is_object()) {
+            if let Some(list) = w.get("warnings").and_then(Value::as_array) {
+                warnings.extend(
+                    list.iter()
+                        .filter_map(|x| x.get("message").and_then(Value::as_str))
+                        .filter(|m| !m.is_empty())
+                        .map(str::to_owned),
+                );
+            }
+            if warnings.is_empty() {
+                if let Some(m) = w.get("message").and_then(Value::as_str) {
+                    warnings.push(m.to_owned());
+                }
+            }
+            warnings = warnings
+                .into_iter()
+                .map(|m| self.transport().redact(&m))
+                .collect();
+            for m in &warnings {
+                ::tracing::warn!(target: LOG_TARGET, operation = op, warning = %m, "signoz query warning");
+            }
+        }
+        warnings
+    }
+
     /// Posts one builder query (`POST /api/v5/query_range`) and returns its first result plus
     /// the server warnings (also logged at warn level).
-    pub(crate) async fn query_range(
+    pub(crate) async fn builder_query(
         &self,
         op: &str,
         request_type: &str,
@@ -202,28 +250,7 @@ impl SignozQueryClient {
                 true,
             )
             .await?;
-        let mut warnings = Vec::new();
-        if let Some(w) = data.get("warning").filter(|w| w.is_object()) {
-            if let Some(list) = w.get("warnings").and_then(Value::as_array) {
-                warnings.extend(
-                    list.iter()
-                        .filter_map(|x| x.get("message").and_then(Value::as_str))
-                        .map(str::to_owned),
-                );
-            }
-            if warnings.is_empty() {
-                if let Some(m) = w.get("message").and_then(Value::as_str) {
-                    warnings.push(m.to_owned());
-                }
-            }
-            warnings = warnings
-                .into_iter()
-                .map(|m| self.transport().redact(&m))
-                .collect();
-            for m in &warnings {
-                ::tracing::warn!(target: LOG_TARGET, operation = op, warning = %m, "signoz query warning");
-            }
-        }
+        let warnings = self.warnings(op, &data);
         let first = data
             .pointer("/data/results")
             .and_then(Value::as_array)
@@ -231,6 +258,15 @@ impl SignozQueryClient {
             .cloned();
         Ok((first, warnings))
     }
+}
+
+/// Result of [`SignozQueryClient::query_range`].
+#[derive(Debug, Clone, PartialEq)]
+pub struct QueryRangeResult {
+    /// The `data` member of the response envelope (`Value::Null` when absent).
+    pub data: Value,
+    /// Server warnings (also logged).
+    pub warnings: Vec<String>,
 }
 
 /// Maps the SPA index page (served with 200 for unknown routes) to `UNSUPPORTED`.

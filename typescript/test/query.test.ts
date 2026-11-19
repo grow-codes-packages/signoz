@@ -225,9 +225,46 @@ describe("queryLogs", () => {
     expect(ties).toEqual(["row 3", "row 2", "row 1"]);
   });
 
+  it("uses the shared cursor wire format (v/s/e/o/m/x, base64url without padding)", async () => {
+    const base = NOW - 60_000;
+    const { client, server } = await setup((req) => {
+      if (req.url !== "/api/v5/query_range") return undefined;
+      return { body: rawLogs([logRow(2, base + 2, "b"), logRow(1, base + 2, "a")]) };
+    });
+    const first = await client.query.queryLogs({ limit: 2 });
+    const cursor = first.nextCursor!;
+    expect(cursor).not.toContain("=");
+    const decoded = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8")) as Record<
+      string,
+      unknown
+    >;
+    expect(Object.keys(decoded)).toEqual(["v", "s", "e", "o", "m", "x"]);
+    expect(decoded).toMatchObject({ v: 1, o: "desc", m: base + 2, x: ["b", "a"] });
+
+    // a cursor written by Go ("x": null when no ids) is accepted
+    const goCursor = Buffer.from(
+      JSON.stringify({ v: 1, s: base - 10, e: base + 10, o: "asc", m: base, x: null }),
+    ).toString("base64url");
+    await client.query.queryLogs({ limit: 2, cursor: goCursor });
+    const sent = querySpec(server.requests[1]!);
+    expect(sent.start).toBe(base);
+    expect(sent.end).toBe(base + 10);
+    expect(sent.spec.filter).toBeUndefined();
+    // and a missing "x" too
+    const noIds = Buffer.from(
+      JSON.stringify({ v: 1, s: base - 10, e: base + 10, o: "desc", m: base }),
+    ).toString("base64url");
+    await client.query.queryLogs({ limit: 2, cursor: noIds });
+    expect(querySpec(server.requests[2]!).end).toBe(base + 1);
+    // limit 0 means the default (100), as in every language
+    await client.query.queryLogs({ limit: 0 });
+    expect(querySpec(server.requests[3]!).spec.limit).toBe(100);
+  });
+
   it("validates options and cursors", async () => {
     const { client } = await setup();
-    await expect(client.query.queryLogs({ limit: 0 })).rejects.toBeInstanceOf(ValidationError);
+    await expect(client.query.queryLogs({ limit: -1 })).rejects.toBeInstanceOf(ValidationError);
+    await expect(client.query.queryLogs({ limit: 1.5 })).rejects.toBeInstanceOf(ValidationError);
     await expect(client.query.queryLogs({ limit: 10_001 })).rejects.toBeInstanceOf(ValidationError);
     await expect(client.query.queryLogs({ orderBy: "up" as never })).rejects.toBeInstanceOf(
       ValidationError,
@@ -235,6 +272,10 @@ describe("queryLogs", () => {
     await expect(client.query.queryLogs({ cursor: "garbage" })).rejects.toThrow("invalid cursor");
     const wrongShape = Buffer.from(JSON.stringify({ v: 2 })).toString("base64url");
     await expect(client.query.queryLogs({ cursor: wrongShape })).rejects.toThrow("invalid cursor");
+    const badIds = Buffer.from(
+      JSON.stringify({ v: 1, s: 1, e: 2, o: "asc", m: 1, x: [1] }),
+    ).toString("base64url");
+    await expect(client.query.queryLogs({ cursor: badIds })).rejects.toThrow("invalid cursor");
     await expect(
       client.query.queryLogs({ start: new Date(NOW), end: new Date(NOW - 1) }),
     ).rejects.toBeInstanceOf(ValidationError);
@@ -339,6 +380,50 @@ describe("traces", () => {
     });
     expect(await client.traces.getTrace("0123456789abcdef0123456789abcdef")).toBeNull();
     await expect(client.traces.getTrace("not-hex")).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("getTrace returns null when the waterfall has no spans", async () => {
+    const { client } = await setup((req) =>
+      req.url.startsWith("/api/v4/traces/")
+        ? { body: { status: "success", data: { spans: [], totalSpansCount: 0 } } }
+        : undefined,
+    );
+    expect(await client.traces.getTrace(TRACE_ID)).toBeNull();
+  });
+
+  it("getTrace completes a windowed waterfall (hasMore) with raw span queries", async () => {
+    const waterfall = fixture("getTrace.waterfall.ok.json") as { data: Record<string, unknown> };
+    const windowed = {
+      ...waterfall,
+      data: { ...waterfall.data, hasMore: true, totalSpansCount: 4 },
+    };
+    const spans = (
+      fixture("queryTraces.raw.ok.json") as {
+        data: { data: { results: { rows: unknown[] }[] } };
+      }
+    ).data.data.results[0]!.rows;
+    const { client, server } = await setup((req) => {
+      if (req.url.startsWith("/api/v4/traces/")) return { body: windowed };
+      if (req.url === "/api/v5/query_range") {
+        return {
+          body: {
+            status: "success",
+            data: { type: "raw", data: { results: [{ queryName: "A", rows: spans }] } },
+          },
+        };
+      }
+      return undefined;
+    });
+    const trace = await client.traces.getTrace(TRACE_ID);
+    expect(trace).not.toBeNull();
+    expect(trace!.complete).toBe(true);
+    expect(trace!.spans).toHaveLength(spans.length);
+    const q = querySpec(server.requests[1]!);
+    expect((q.spec.filter as { expression: string }).expression).toBe(`trace_id = '${TRACE_ID}'`);
+    expect(q.spec.limit).toBe(10_000);
+    expect((q.spec.order as { direction: string }[])[0]!.direction).toBe("asc");
+    expect(q.start).toBe(Number(waterfall.data.startTimestampMillis));
+    expect(q.end).toBe(Number(waterfall.data.endTimestampMillis) + 1);
   });
 
   it("waitForTrace polls until the trace exists", async () => {

@@ -131,6 +131,10 @@ impl QueryClient<'_> {
         self.client.inner.query()
     }
 
+    /// See [`SignozQueryClient::query_range`].
+    pub fn query_range(&self, body: &serde_json::Value) -> Result<crate::QueryRangeResult> {
+        self.client.block_on(self.q().query_range(body))
+    }
     /// See [`SignozQueryClient::query_logs`].
     pub fn query_logs(&self, query: LogQuery) -> Result<LogQueryResult> {
         self.client.block_on(self.q().query_logs(query))

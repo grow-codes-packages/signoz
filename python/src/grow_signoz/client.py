@@ -91,6 +91,11 @@ def _health_from_error(err: ServiceError) -> HealthStatus:
     return HealthStatus(healthy=False, status=word, details={"error": err.message})
 
 
+def _ensure_open(closed: bool) -> None:
+    if closed:
+        raise CancelledError("signoz: client is closed")
+
+
 def _version(result: Any) -> str:
     body = result.data if result is not None else None
     version = body.get("version") if isinstance(body, Mapping) else None
@@ -214,6 +219,7 @@ class SignozClient:
         if config is None:
             config = SignozConfig.from_env()
         self.config = config.validate()
+        self._closed = False
         self._resources = ResourceRegistry()
         self._transport = HttpTransport(
             self.config, known_secrets=self.config.known_secrets, http_transport=http_transport
@@ -285,7 +291,11 @@ class SignozClient:
         correlate: bool = True,
     ) -> BatchingLogClient:
         """An OTLP log client for the collector (see :func:`create_log_client`); it is
-        flushed and closed by :meth:`close`."""
+        flushed and closed by :meth:`close`.
+
+        Raises :class:`CancelledError` when the client is closed.
+        """
+        _ensure_open(self._closed)
         client = create_log_client(
             self.config,
             service_name=service_name,
@@ -304,7 +314,11 @@ class SignozClient:
 
     def init_tracing(self, config: TracingConfig | str, **overrides: Any) -> TracingHandle:
         """Tracing to the collector with this client's config (see :func:`init_tracing`); the
-        handle is shut down by :meth:`close`."""
+        handle is shut down by :meth:`close`.
+
+        Raises :class:`CancelledError` when the client is closed.
+        """
+        _ensure_open(self._closed)
         handle = _init_tracing(config, signoz=self.config, **overrides)
         self._resources.register(_Stopper(handle.shutdown))
         return handle
@@ -314,6 +328,7 @@ class SignozClient:
 
         Idempotent.
         """
+        self._closed = True
         self._resources.stop_all()
         self._transport.close()
 
@@ -415,7 +430,8 @@ class AsyncSignozClient:
         correlate: bool = True,
     ) -> AsyncBatchingLogClient:
         """An async OTLP log client (see :func:`create_async_log_client`), closed by
-        :meth:`aclose`."""
+        :meth:`aclose`. Raises :class:`CancelledError` when the client is closed."""
+        _ensure_open(self._closed)
         client = create_async_log_client(
             self.config,
             service_name=service_name,
@@ -434,6 +450,7 @@ class AsyncSignozClient:
 
     def init_tracing(self, config: TracingConfig | str, **overrides: Any) -> TracingHandle:
         """See :meth:`SignozClient.init_tracing`; shut down by :meth:`aclose`."""
+        _ensure_open(self._closed)
         handle = _init_tracing(config, signoz=self.config, **overrides)
         self._tracing.append(handle)
         return handle

@@ -480,6 +480,30 @@ async fn signoz_round_trip() {
     }
     assert_eq!(total, 6.0, "{ts:?}");
 
+    // ---- raw query_range
+    let now_ms = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as i64;
+    let raw = q
+        .query_range(&json!({
+            "start": now_ms - 3_600_000,
+            "end": now_ms + 1_000,
+            "requestType": "scalar",
+            "compositeQuery": {"queries": [{
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "logs",
+                    "filter": {"expression": by_service.expression()},
+                    "aggregations": [{"expression": "count()"}]
+                }
+            }]}
+        }))
+        .await
+        .unwrap();
+    assert!(raw.data.to_string().contains("__result_0"), "{raw:?}");
+
     // ---- tracing round trip
     let trace_service = format!("rust-it-trace-{run}");
     let db_service = format!("rust-it-db-{run}");

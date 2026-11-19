@@ -10,7 +10,7 @@ npm install @grow-codes/signoz
 ```ts
 import { SignozClient } from "@grow-codes/signoz";
 
-// Reads GROW_SIGNOZ_URL, GROW_SIGNOZ_TOKEN, timeouts, TLS and proxy settings.
+// Reads GROW_SIGNOZ_URL, GROW_SIGNOZ_API_KEY, GROW_SIGNOZ_OTLP_ENDPOINT, timeouts, TLS and proxy settings.
 const client = SignozClient.fromEnv();
 try {
   console.log(await client.health()); // { healthy: true, status: "ok", details: {} }

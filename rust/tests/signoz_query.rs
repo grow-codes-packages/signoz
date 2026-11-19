@@ -1132,3 +1132,23 @@ async fn query_without_api_key_sends_no_header() {
     assert!(reqs[0].headers.get("SIGNOZ-API-KEY").is_none());
     assert!(format!("{:?}", c.query()).contains("SignozQueryClient"));
 }
+
+#[tokio::test]
+async fn query_range_posts_a_raw_body() {
+    let server = MockServer::start().await;
+    mount_qr(
+        &server,
+        ResponseTemplate::new(200).set_body_json(json!({
+            "status": "success",
+            "data": {"type": "scalar", "warning": {"warnings": [{"message": "w1"}]}, "data": {"results": []}}
+        })),
+    )
+    .await;
+    let c = client(&server.uri());
+    let body = json!({"start": 1, "end": 2, "requestType": "scalar"});
+    let res = c.query().query_range(&body).await.unwrap();
+    assert_eq!(res.warnings, vec!["w1".to_owned()]);
+    assert_eq!(res.data["type"], "scalar");
+    let reqs = server.received_requests().await.unwrap();
+    assert_eq!(last_body(&reqs)["requestType"], "scalar");
+}

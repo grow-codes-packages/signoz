@@ -256,7 +256,7 @@ func TestLogRecordFromRow(t *testing.T) {
 		t.Fatalf("%+v", r)
 	}
 	r = logRecordFromRow(rawRow{Data: map[string]any{"timestamp": "garbage"}})
-	if r.Severity != SeverityUnspecified || r.SeverityText != "" || r.Timestamp.UnixNano() != 0 {
+	if r.Severity != SeverityInfo || r.SeverityText != "INFO" || r.Timestamp.UnixNano() != 0 {
 		t.Fatalf("%+v", r)
 	}
 }
@@ -350,5 +350,29 @@ func TestLogFields(t *testing.T) {
 	}
 	if _, err := q.ListFieldValues(ctx, "x", FieldValuesOptions{}); !errors.Is(err, ErrUnavailable) {
 		t.Fatal(err)
+	}
+}
+
+func TestQueryRange(t *testing.T) {
+	m := newMock(t)
+	m.json("POST /api/v5/query_range", 200, []byte(`{"status":"success","data":{"type":"scalar","warning":{"warnings":[{"message":"w1"}]},"data":{"results":[]}}}`))
+	q := newQueryClient(t, m)
+	body := map[string]any{"start": 1, "end": 2, "requestType": "scalar"}
+	res, err := q.QueryRange(t.Context(), body)
+	if err != nil || len(res.Warnings) != 1 || res.Warnings[0] != "w1" || !strings.Contains(string(res.Data), `"scalar"`) {
+		t.Fatalf("%v %+v", err, res)
+	}
+	sent := queryBody(t, m.last(t))
+	if sent["requestType"] != "scalar" || m.last(t).Header.Get(APIKeyHeader) != testToken {
+		t.Fatalf("request %s", m.last(t).Body)
+	}
+	m.json("POST /api/v5/query_range", 200, []byte(`{"status":"success","data":null}`))
+	res, err = q.QueryRange(t.Context(), body)
+	if err != nil || len(res.Warnings) != 0 || res.Warnings == nil {
+		t.Fatalf("%v %+v", err, res)
+	}
+	m.json("POST /api/v5/query_range", 400, fixture(t, "queryLogs.invalidFilter.json"))
+	if _, err := q.QueryRange(t.Context(), body); !errors.Is(err, ErrValidation) {
+		t.Fatalf("%v", err)
 	}
 }

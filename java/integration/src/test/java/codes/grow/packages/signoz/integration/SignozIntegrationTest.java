@@ -20,6 +20,7 @@ import codes.grow.packages.signoz.LogField;
 import codes.grow.packages.signoz.LogQuery;
 import codes.grow.packages.signoz.LogQueryResult;
 import codes.grow.packages.signoz.OtlpProtocol;
+import codes.grow.packages.signoz.QueryRangeResult;
 import codes.grow.packages.signoz.Signal;
 import codes.grow.packages.signoz.SignozClient;
 import codes.grow.packages.signoz.SignozConfig;
@@ -492,6 +493,28 @@ class SignozIntegrationTest {
     }
     assertEquals(6.0, total, series.toString());
     assertEquals(6.0, q.aggregate(Signal.LOGS).filter(byService).count("n").runAsync().join().rows().get(0).values().get("n"));
+    long nowMs = System.currentTimeMillis();
+    QueryRangeResult raw =
+        q.queryRange(
+            java.util.Map.of(
+                "start", nowMs - 3_600_000L,
+                "end", nowMs + 1_000L,
+                "requestType", "scalar",
+                "compositeQuery",
+                    java.util.Map.of(
+                        "queries",
+                        java.util.List.of(
+                            java.util.Map.of(
+                                "type", "builder_query",
+                                "spec",
+                                    java.util.Map.of(
+                                        "name", "A",
+                                        "signal", "logs",
+                                        "filter", java.util.Map.of("expression", byService),
+                                        "aggregations",
+                                            java.util.List.of(
+                                                java.util.Map.of("expression", "count()"))))))));
+    assertTrue(raw.data().toString().contains("__result_0"), raw.toString());
   }
 
   @Test

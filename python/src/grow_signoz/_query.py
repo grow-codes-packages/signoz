@@ -180,15 +180,21 @@ def _decode_cursor(text: str, operation: str) -> dict[str, Any]:
         cursor = json.loads(base64.urlsafe_b64decode(padded.encode("ascii")))
     except (ValueError, binascii.Error, UnicodeError):
         cursor = None
+    # "x" may be null (Go encodes an empty id list as null) or missing.
+    ids = cursor.get("x") if isinstance(cursor, dict) else None
+    ids = [] if ids is None else ids
     if (
         isinstance(cursor, dict)
         and cursor.get("v") == 1
         and cursor.get("o") in ("asc", "desc")
-        and all(isinstance(cursor.get(k), int) for k in ("s", "e", "m"))
-        and isinstance(cursor.get("x", []), list)
-        and all(isinstance(i, str) for i in cursor.get("x", []))
+        and all(
+            isinstance(cursor.get(k), int) and not isinstance(cursor.get(k), bool)
+            for k in ("s", "e", "m")
+        )
+        and isinstance(ids, list)
+        and all(isinstance(i, str) for i in ids)
     ):
-        return cursor
+        return {**cursor, "x": ids}
     raise ValidationError(f"{operation}: invalid cursor")
 
 

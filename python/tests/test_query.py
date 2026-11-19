@@ -463,3 +463,22 @@ async def test_async_query_client() -> None:
         assert (await q.query_range({"a": 1})).data is not None
         waited = await c.traces.wait_for_trace(TRACE_ID, timeout_s=5, interval_s=0.01)
         assert waited.trace_id == TRACE_ID
+
+
+def test_query_logs_accepts_go_cursor_with_null_ids() -> None:
+    # Go encodes an empty id list as "x": null; a missing "x" is accepted too.
+    router = Router().add("POST", QR, raw(None)).add("POST", QR, raw(None))
+    q = client(router).query
+    for body in (
+        b'{"v":1,"s":1000,"e":5000,"o":"asc","m":2000,"x":null}',
+        b'{"v":1,"s":1000,"e":5000,"o":"desc","m":2000}',
+    ):
+        cursor = base64.urlsafe_b64encode(body).decode().rstrip("=")
+        assert q.query_logs(cursor=cursor).next_cursor is None
+    first, second = router.bodies(QR)
+    assert (first["start"], first["end"]) == (2000, 5000)
+    assert (second["start"], second["end"]) == (1000, 2001)
+    assert "filter" not in spec_of(first)
+    bad = base64.urlsafe_b64encode(b'{"v":1,"s":true,"e":5,"o":"asc","m":2,"x":null}').decode()
+    with pytest.raises(sdk.ValidationError):
+        q.query_logs(cursor=bad)

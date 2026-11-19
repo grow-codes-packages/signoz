@@ -16,6 +16,7 @@ import {
 import { BaseTraceQueryClient, type DependencyOptions } from "./tracing/query.js";
 import {
   normalizeTraceId,
+  sortSpans,
   type DependencyLink,
   type Span,
   type TraceSearchQuery,
@@ -109,15 +110,20 @@ export interface LogField {
   description?: string;
 }
 
+/**
+ * The SDK's own keyset cursor. Same wire form in every language (Go is the reference):
+ * base64url without padding of `{"v":1,"s":<startMs>,"e":<endMs>,"o":"asc|desc","m":<boundaryMs>,"x":[ids]}`.
+ * `x` may be `null` or missing (no ids excluded).
+ */
 interface Cursor {
   v: 1;
   s: number;
   e: number;
   o: "asc" | "desc";
   /** Boundary millisecond of the last row. */
-  b: number;
+  m: number;
   /** Ids already returned in the boundary millisecond. */
-  ids: string[];
+  x: string[];
 }
 
 function encodeCursor(cursor: Cursor): string {
@@ -126,17 +132,20 @@ function encodeCursor(cursor: Cursor): string {
 
 function decodeCursor(text: string): Cursor {
   try {
-    const c = JSON.parse(Buffer.from(text, "base64url").toString("utf8")) as Partial<Cursor>;
+    const c = JSON.parse(Buffer.from(text, "base64url").toString("utf8")) as Partial<
+      Omit<Cursor, "x">
+    > & { x?: unknown };
+    const ids = c.x ?? [];
     if (
       c.v === 1 &&
-      typeof c.s === "number" &&
-      typeof c.e === "number" &&
-      typeof c.b === "number" &&
+      Number.isInteger(c.s) &&
+      Number.isInteger(c.e) &&
+      Number.isInteger(c.m) &&
       (c.o === "asc" || c.o === "desc") &&
-      Array.isArray(c.ids) &&
-      c.ids.every((id) => typeof id === "string")
+      Array.isArray(ids) &&
+      ids.every((id) => typeof id === "string")
     ) {
-      return c as Cursor;
+      return { v: 1, s: c.s as number, e: c.e as number, o: c.o, m: c.m as number, x: ids };
     }
   } catch {
     // fall through
@@ -161,7 +170,8 @@ export function resolveWindow(
 }
 
 function checkLimit(limit: number | undefined, fallback: number, operation: string): number {
-  const value = limit ?? fallback;
+  // undefined or 0 = the default (same as the other languages, where 0 is the unset value)
+  const value = limit === undefined || limit === 0 ? fallback : limit;
   if (!Number.isInteger(value) || value <= 0 || value > MAX_RAW_LIMIT) {
     throw new ValidationError(
       `${operation}: limit must be an integer between 1 and ${MAX_RAW_LIMIT}`,
@@ -291,11 +301,11 @@ export class SignozQueryClient extends BaseTraceQueryClient {
     if (options.cursor !== undefined) {
       carried = decodeCursor(options.cursor);
       order = carried.o;
-      exclude = carried.ids;
+      exclude = carried.x;
       window =
         order === "desc"
-          ? { start: carried.s, end: carried.b + 1 }
-          : { start: carried.b, end: carried.e };
+          ? { start: carried.s, end: carried.m + 1 }
+          : { start: carried.m, end: carried.e };
     } else {
       window = this.#window(options);
     }
@@ -332,14 +342,14 @@ export class SignozQueryClient extends BaseTraceQueryClient {
       const ids = records
         .filter((r) => nanosToMs(BigInt(r.timeUnixNano)) === boundary)
         .map((r) => r.id);
-      const sameBoundary = carried !== undefined && carried.b === boundary ? carried.ids : [];
+      const sameBoundary = carried !== undefined && carried.m === boundary ? carried.x : [];
       result.nextCursor = encodeCursor({
         v: 1,
         s: carried?.s ?? window.start,
         e: carried?.e ?? window.end,
         o: order,
-        b: boundary,
-        ids: [...new Set([...sameBoundary, ...ids])],
+        m: boundary,
+        x: [...new Set([...sameBoundary, ...ids])],
       });
     }
     return result;
@@ -375,8 +385,10 @@ export class SignozQueryClient extends BaseTraceQueryClient {
   }
 
   /**
-   * Full trace via `POST /api/v4/traces/{traceId}/waterfall`; `null` when SigNoz does not know it.
-   * Span start times have millisecond precision (the waterfall reports `time_unix` in ms).
+   * Full trace via `POST /api/v4/traces/{traceId}/waterfall`; `null` when SigNoz does not know it
+   * or reports no spans for it. Span start times have millisecond precision (the waterfall reports
+   * `time_unix` in ms). A trace larger than the server's waterfall window (`hasMore`) is completed
+   * with raw span queries, as in every language.
    */
   async getTrace(
     traceId: string,
@@ -390,7 +402,38 @@ export class SignozQueryClient extends BaseTraceQueryClient {
       signal: options.signal,
       nullOn404: true,
     });
-    return res === null ? null : waterfallToTrace(id, res.data);
+    if (res === null) return null;
+    const trace = waterfallToTrace(id, res.data);
+    if (trace.spans.length === 0) return null;
+    if (!trace.complete) {
+      const data = obj(res.data);
+      const startMs = Number(data.startTimestampMillis ?? 0);
+      const endMs = Number(data.endTimestampMillis ?? 0);
+      trace.spans = sortSpans(
+        await this.#allSpans(id, new Date(startMs), new Date(endMs + 1), options.signal),
+      );
+      trace.complete = true;
+      trace.totalSpans = Math.max(trace.totalSpans, trace.spans.length);
+    }
+    return trace;
+  }
+
+  /** Pages through every span of a trace with a frozen window (offset paging). */
+  async #allSpans(id: string, start: Date, end: Date, signal?: AbortSignal): Promise<Span[]> {
+    const out: Span[] = [];
+    for (;;) {
+      const page = await this.queryTraces({
+        filter: `trace_id = ${quoteFilterString(id)}`,
+        start,
+        end,
+        limit: MAX_RAW_LIMIT,
+        orderBy: "asc",
+        offset: out.length,
+        ...(signal === undefined ? {} : { signal }),
+      });
+      out.push(...page.spans);
+      if (page.spans.length < MAX_RAW_LIMIT) return out;
+    }
   }
 
   /**

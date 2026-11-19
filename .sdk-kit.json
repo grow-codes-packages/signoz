@@ -238,7 +238,7 @@
     },
     {
       "path": "docker/compose.yml",
-      "sha256": "e2d8a79a57eee7b4075cd725d354e0b59d0adce26ae35e1cce8207536f9582ca",
+      "sha256": "b86ccb03968e35e62066bfa8b5d81ee56159dbed6a16148a6a15457ce33abac5",
       "generated": true
     },
     {
@@ -1473,7 +1473,7 @@
     },
     {
       "path": "java/src/test/java/codes/grow/packages/signoz/tracing/TracingSetupTest.java",
-      "sha256": "f4802bf39a3f28c3c0715502af9a47909beede941f999b1acaeb168673154ffb",
+      "sha256": "35bae01d32228ed2364bc3248091504dc8fd411be6477f84ab51bbbdeed5d3c8",
       "generated": true
     },
     {

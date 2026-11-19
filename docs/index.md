@@ -18,6 +18,15 @@ has the same functions, options, defaults, error codes and behaviour, tested aga
 
 ## What you get
 
+- **Ingest over OTLP** to the SigNoz collector (HTTP protobuf or gRPC, gzip, SigNoz Cloud
+  ingestion key): batching log client, log exporter and OpenTelemetry tracing
+  ([Ingest](functions/ingest.md)).
+- **Query API**: raw log queries with a lossless keyset cursor, live tail, log fields and values,
+  raw span queries, full traces from the waterfall, trace search, services, operations,
+  dependencies ([Logs](functions/logs.md), [Traces](functions/traces.md)).
+- **Aggregations**: count, percentiles, sums … grouped, as scalars or time series, plus raw
+  `queryRange` requests ([Aggregate](functions/aggregate.md)).
+- **`FilterBuilder`** for safe SigNoz filter expressions ([FilterBuilder](functions/filter.md)).
 - **Client** with health, authenticated ping and server version ([Client](client.md)).
 - **Configuration** from code or `GROW_SIGNOZ_*` / vendor environment variables, immutable
   and validated ([Configuration](configuration.md)).
@@ -30,7 +39,7 @@ has the same functions, options, defaults, error codes and behaviour, tested aga
   log search ([Logging](logging.md)).
 - **Tracing**: OpenTelemetry setup, span helpers, propagation, framework adapters and trace
   queries ([Tracing](tracing.md)).
-- **Service functions** for the SigNoz API ([Functions](functions.md)).
+- **Every function** with an example in all five languages ([Functions](functions.md)).
 
 Start with [Install](install.md) and the [Quickstart](quickstart.md).
 

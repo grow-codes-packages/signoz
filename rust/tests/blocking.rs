@@ -129,6 +129,10 @@ fn blocking_query_logs_and_tracing() {
     let q = c.query();
     let id = "fe67ae4bfe67ae4bfe67ae4bfe67ae4b";
     assert_eq!(q.query_logs(LogQuery::default()).unwrap().records.len(), 6);
+    let raw = q
+        .query_range(&json!({"start": 1, "end": 2, "requestType": "raw"}))
+        .unwrap();
+    assert!(raw.data.pointer("/data/results").is_some());
     assert_eq!(
         q.search("x", SearchOptions::default())
             .unwrap()

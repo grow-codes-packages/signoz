@@ -35,6 +35,14 @@ def test_signoz_tracing_config_defaults_and_overrides() -> None:
         "svc", config(otlp_protocol="grpc", otlp_endpoint="http://g:4317")
     )
     assert (from_grpc_config.protocol, from_grpc_config.endpoint) == ("grpc", "http://g:4317")
+    # the TracingConfig default (http/protobuf) follows the SigNoz config, as in Rust and Java
+    grpc_cfg = config(otlp_protocol="grpc", otlp_endpoint="http://g:4317")
+    default_obj = sdk.signoz_tracing_config(sdk.TracingConfig("svc"), grpc_cfg)
+    assert (default_obj.protocol, default_obj.endpoint) == ("grpc", "http://g:4317")
+    with_endpoint = sdk.signoz_tracing_config(
+        sdk.TracingConfig("svc", endpoint="http://h:4318"), grpc_cfg
+    )
+    assert (with_endpoint.protocol, with_endpoint.endpoint) == ("http/protobuf", "http://h:4318")
     with pytest.raises(sdk.ConfigError):
         sdk.signoz_tracing_config("svc", cfg, protocol="native")
     with pytest.raises(sdk.ConfigError):

@@ -90,8 +90,8 @@ pub use crate::otlp_logs::{
     build_otlp_logs_request, new_log_client, LogOptions, OtlpLogExporter, LOG_SCOPE_NAME,
 };
 pub use crate::query::{
-    Signal, SignozQueryClient, TimeRange, DEFAULT_QUERY_WINDOW, DEFAULT_SEARCH_LIMIT,
-    DEFAULT_TRACE_SEARCH_LIMIT, MAX_QUERY_LIMIT,
+    QueryRangeResult, Signal, SignozQueryClient, TimeRange, DEFAULT_QUERY_WINDOW,
+    DEFAULT_SEARCH_LIMIT, DEFAULT_TRACE_SEARCH_LIMIT, MAX_QUERY_LIMIT,
 };
 pub use crate::query_logs::{
     FieldValuesOptions, ListFieldsOptions, LogField, LogQuery, LogQueryResult,

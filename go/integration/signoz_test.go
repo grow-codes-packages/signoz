@@ -161,6 +161,21 @@ func TestSignoz(t *testing.T) {
 		if err != nil || len(warn.Records) != 0 || len(warn.Warnings) == 0 {
 			t.Fatalf("warnings: %v %+v", err, warn)
 		}
+		now := time.Now()
+		raw, err := q.QueryRange(ctx, map[string]any{
+			"start": now.Add(-time.Hour).UnixMilli(), "end": now.Add(time.Second).UnixMilli(), "requestType": "scalar",
+			"compositeQuery": map[string]any{"queries": []any{map[string]any{
+				"type": "builder_query",
+				"spec": map[string]any{
+					"name": "A", "signal": "logs",
+					"filter":       map[string]any{"expression": signoz.NewFilter().Eq("service.name", service).String()},
+					"aggregations": []any{map[string]any{"expression": "count()"}},
+				},
+			}}},
+		})
+		if err != nil || !strings.Contains(string(raw.Data), "__result_0") {
+			t.Fatalf("query range: %v %s", err, raw.Data)
+		}
 	})
 
 	t.Run("exporters http, grpc and raw", func(t *testing.T) {

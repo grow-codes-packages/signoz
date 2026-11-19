@@ -1,6 +1,7 @@
 // Service-owned: SignozClient — health, ping, version, query clients, log client and tracing.
 
 import {
+  CancelledError,
   type HealthStatus,
   HttpTransport,
   type TransportOptions,
@@ -184,9 +185,10 @@ export class SignozClient {
 
   /**
    * Creates an OTLP log client for the collector (see {@link createLogClient}); it is flushed and
-   * closed by {@link close}.
+   * closed by {@link close}. `CancelledError` when the client is closed.
    */
   logClient(options: SignozLogClientOptions = {}): BatchingLogClient {
+    this.#ensureOpen();
     const client = createLogClient(this.config, options);
     this.#logClients.add(client);
     return client;
@@ -197,12 +199,20 @@ export class SignozClient {
    * handle is shut down by {@link close}.
    */
   initTracing(config: TracingConfigInput, options: InitTracingOptions = {}): TracingHandle {
+    this.#ensureOpen();
     const handle = initTracing({ signoz: this.config, ...config }, options);
     this.#tracing.add(handle);
     return handle;
   }
 
-  /** Flushes and closes log clients and tracing handles, then releases connections. Idempotent. */
+  #ensureOpen(): void {
+    if (this.#closed) throw new CancelledError("signoz: client is closed");
+  }
+
+  /**
+   * Flushes and closes log clients and tracing handles, then releases connections. Idempotent.
+   * Any call on a closed client raises `CancelledError` ("client is closed").
+   */
   async close(): Promise<void> {
     if (this.#closed) return;
     this.#closed = true;

@@ -21,7 +21,10 @@ import {
 } from "@grow-codes/signoz";
 import { loadBootstrapEnv, runId } from "./env.ts";
 
-const run = `${runId.replace(/[^a-z0-9]/gi, "").slice(0, 8).toLowerCase()}${Math.random().toString(36).slice(2, 8)}`;
+const run = `${runId
+  .replace(/[^a-z0-9]/gi, "")
+  .slice(0, 8)
+  .toLowerCase()}${Math.random().toString(36).slice(2, 8)}`;
 let client: SignozClient;
 // Library timers are unref'd; keep the event loop alive while the suite polls the service.
 const keepAlive = setInterval(() => undefined, 1000);
@@ -39,7 +42,11 @@ after(async () => {
   clearInterval(keepAlive);
 });
 
-async function poll<T>(fn: () => Promise<T>, ok: (v: T) => boolean, timeoutMs = 60_000): Promise<T> {
+async function poll<T>(
+  fn: () => Promise<T>,
+  ok: (v: T) => boolean,
+  timeoutMs = 60_000,
+): Promise<T> {
   const deadline = Date.now() + timeoutMs;
   let last: T;
   for (;;) {
@@ -159,7 +166,12 @@ test("queryLogs pages with the SDK cursor (exact, no duplicates) and selectField
     let cursor: string | undefined;
     let pages = 0;
     do {
-      const page = await client.query.queryLogs({ filter, limit: 3, orderBy, ...(cursor ? { cursor } : {}) });
+      const page = await client.query.queryLogs({
+        filter,
+        limit: 3,
+        orderBy,
+        ...(cursor ? { cursor } : {}),
+      });
       seen.push(...page.records.map((r) => r.body));
       cursor = page.nextCursor;
       pages++;
@@ -175,7 +187,10 @@ test("queryLogs pages with the SDK cursor (exact, no duplicates) and selectField
 test("queryLogs: unknown fields warn, malformed filters raise VALIDATION", async () => {
   const warned = await client.query.queryLogs({ filter: `nosuchfield_${run} = 'x'` });
   assert.equal(warned.records.length, 0);
-  assert.ok(warned.warnings.some((w) => w.includes(`nosuchfield_${run}`)), JSON.stringify(warned.warnings));
+  assert.ok(
+    warned.warnings.some((w) => w.includes(`nosuchfield_${run}`)),
+    JSON.stringify(warned.warnings),
+  );
   await assert.rejects(client.query.queryLogs({ filter: "body = (" }), (err: unknown) => {
     assert.ok(err instanceof SignozError);
     assert.equal(err.code, "VALIDATION");
@@ -199,16 +214,27 @@ test("LogQueryClient: search, waitForLog, listStreams, listLabels, listLogFields
   const page = await client.logs.search(`needle_${run}`, { limit: 10, order: "asc" });
   assert.equal(page.records.length, 1);
   assert.equal(page.nextCursor, undefined);
-  const streams = await poll(() => client.logs.listStreams(), (s) => s.includes(service), 30_000);
+  const streams = await poll(
+    () => client.logs.listStreams(),
+    (s) => s.includes(service),
+    30_000,
+  );
   assert.ok(streams.includes(service), JSON.stringify(streams));
-  const labels = await poll(() => client.logs.listLabels(), (l) => l.includes(`label_${run}`), 30_000);
+  const labels = await poll(
+    () => client.logs.listLabels(),
+    (l) => l.includes(`label_${run}`),
+    30_000,
+  );
   assert.ok(labels.includes(`label_${run}`));
   const fields = await client.query.listLogFields({ search: `label_${run}` });
   assert.deepEqual(
     fields.map((f) => [f.name, f.context, f.dataType]),
     [[`label_${run}`, "attribute", "string"]],
   );
-  const values = await client.query.listFieldValues("service.name", { source: "logs", search: service });
+  const values = await client.query.listFieldValues("service.name", {
+    source: "logs",
+    search: service,
+  });
   assert.ok(values.includes(service), JSON.stringify(values));
 });
 
@@ -224,7 +250,11 @@ test("tail delivers matching records over live tail (SSE)", async () => {
     logs.send({ message: `tail-${run} match` });
     logs.send({ message: `other ${run} nomatch` });
     await logs.close();
-    await poll(async () => got.length, (n) => n >= 1, 30_000);
+    await poll(
+      async () => got.length,
+      (n) => n >= 1,
+      30_000,
+    );
   } finally {
     handle.stop();
   }
@@ -258,7 +288,8 @@ test("SignozLogExporter exports directly", async () => {
 
 test("aggregate counts logs (scalar + time series)", async () => {
   const logs = createLogClient(SignozConfig.fromEnv(), { serviceName: `ts-agg-${run}` });
-  for (let i = 0; i < 5; i++) logs.send({ message: `agg ${run} ${i}`, attributes: { agg: run, seq: i } });
+  for (let i = 0; i < 5; i++)
+    logs.send({ message: `agg ${run} ${i}`, attributes: { agg: run, seq: i } });
   await logs.close();
   const filter = new FilterBuilder().eq("agg", run);
   const scalar = await poll(
@@ -267,7 +298,10 @@ test("aggregate counts logs (scalar + time series)", async () => {
   );
   assert.deepEqual(scalar.rows, [{ groups: {}, values: { n: 5, maxSeq: 4 } }]);
   const series = await client.query.aggregate("logs").filter(filter).count("n").timeSeries(60);
-  const total = series.filter((s) => s.alias === "n").flatMap((s) => s.points).reduce((a, p) => a + p.value, 0);
+  const total = series
+    .filter((s) => s.alias === "n")
+    .flatMap((s) => s.points)
+    .reduce((a, p) => a + p.value, 0);
   assert.equal(total, 5);
   const raw = await client.query.queryRange({
     start: Date.now() - 3_600_000,
@@ -277,7 +311,12 @@ test("aggregate counts logs (scalar + time series)", async () => {
       queries: [
         {
           type: "builder_query",
-          spec: { name: "A", signal: "logs", filter: { expression: filter.build() }, aggregations: [{ expression: "count()" }] },
+          spec: {
+            name: "A",
+            signal: "logs",
+            filter: { expression: filter.build() },
+            aggregations: [{ expression: "count()" }],
+          },
         },
       ],
     },
@@ -290,9 +329,16 @@ test("tracing over OTLP/HTTP and gRPC: getTrace, waitForTrace, queryTraces, sear
     const service = `ts-trace-${protocol === "grpc" ? "grpc" : "http"}-${run}`;
     const handle = client.initTracing({ serviceName: service, protocol, setGlobal: false });
     const tracer = handle.tracer("integration");
-    const root = tracer.startSpan("GET /checkout", { kind: SpanKind.SERVER, attributes: { run, "http.method": "GET" } });
+    const root = tracer.startSpan("GET /checkout", {
+      kind: SpanKind.SERVER,
+      attributes: { run, "http.method": "GET" },
+    });
     const ctx = trace.setSpan(context.active(), root);
-    const child = tracer.startSpan("db.query", { kind: SpanKind.CLIENT, attributes: { n: 2 } }, ctx);
+    const child = tracer.startSpan(
+      "db.query",
+      { kind: SpanKind.CLIENT, attributes: { n: 2 } },
+      ctx,
+    );
     child.addEvent("checkpoint", { step: 1 });
     child.setStatus({ code: SpanStatusCode.ERROR, message: "boom" });
     child.end();
@@ -326,7 +372,13 @@ test("tracing over OTLP/HTTP and gRPC: getTrace, waitForTrace, queryTraces, sear
     assert.ok((hits[0]?.startMicros ?? 0) > 0);
     assert.ok((await client.traces.listServices()).includes(service));
     assert.deepEqual(await client.traces.listOperations(service), ["GET /checkout", "db.query"]);
-    const agg = await client.query.aggregate("traces").filter(`service.name = '${service}'`).count("calls").p99("duration_nano", "p99").groupBy("name").run();
+    const agg = await client.query
+      .aggregate("traces")
+      .filter(`service.name = '${service}'`)
+      .count("calls")
+      .p99("duration_nano", "p99")
+      .groupBy("name")
+      .run();
     assert.equal(agg.rows.length, 2);
     assert.ok(agg.rows.every((row) => row.values.calls === 1 && (row.values.p99 ?? 0) > 0));
   }
@@ -335,7 +387,11 @@ test("tracing over OTLP/HTTP and gRPC: getTrace, waitForTrace, queryTraces, sear
 
 test("getDependencies reports a db client edge", async () => {
   const service = `ts-deps-${run}`;
-  const handle = initTracing({ serviceName: service, setGlobal: false, signoz: SignozConfig.fromEnv() });
+  const handle = initTracing({
+    serviceName: service,
+    setGlobal: false,
+    signoz: SignozConfig.fromEnv(),
+  });
   const tracer = handle.tracer("integration");
   const root = tracer.startSpan("GET /deps", { kind: SpanKind.SERVER });
   const db = tracer.startSpan(
@@ -360,6 +416,8 @@ test("exporter helpers build the configured exporter", async () => {
   const cfg = SignozConfig.fromEnv();
   const defaults = signozTracingDefaults(cfg, "grpc");
   assert.equal(defaults.protocol, "grpc");
-  const exporter = createSignozSpanExporter(resolveTracingConfig({ serviceName: "x", ...defaults }));
+  const exporter = createSignozSpanExporter(
+    resolveTracingConfig({ serviceName: "x", ...defaults }),
+  );
   await exporter.shutdown();
 });

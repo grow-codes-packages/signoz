@@ -186,6 +186,17 @@ def test_core_close_idempotent_closes_resources() -> None:
     assert handle.is_shut_down
     logs.send(sdk.LogInput("after close"))
     assert logs.stats().dropped == 1
+    # every call on a closed client raises CANCELLED
+    with pytest.raises(sdk.CancelledError):
+        c.ping()
+    with pytest.raises(sdk.CancelledError):
+        c.health()
+    with pytest.raises(sdk.CancelledError):
+        c.query.query_logs()
+    with pytest.raises(sdk.CancelledError, match="client is closed"):
+        c.log_client(service_name="svc")
+    with pytest.raises(sdk.CancelledError, match="client is closed"):
+        c.init_tracing("svc-trace", set_global=False)
 
 
 def test_from_env_and_raw_request(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -225,6 +236,12 @@ async def test_async_client(monkeypatch: pytest.MonkeyPatch) -> None:
     assert logs.stats().queued == 0
     with pytest.raises(sdk.CancelledError):
         await c.health()
+    with pytest.raises(sdk.CancelledError):
+        await c.query.query_logs()
+    with pytest.raises(sdk.CancelledError, match="client is closed"):
+        c.log_client(service_name="svc")
+    with pytest.raises(sdk.CancelledError, match="client is closed"):
+        c.init_tracing("svc-async", set_global=False)
     router.add("GET", "/api/v1/version", httpx.Response(501))
     c2 = sdk.AsyncSignozClient.from_env({P + "URL": "http://x:1"})
     await c2.aclose()

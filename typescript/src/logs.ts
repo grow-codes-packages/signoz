@@ -3,6 +3,7 @@
 import { fetch as undiciFetch, type Dispatcher } from "undici";
 import {
   AuthenticationError,
+  CancelledError,
   ConfigError,
   PermissionDeniedError,
   SignozError,
@@ -99,6 +100,9 @@ export class SignozLogQueryClient extends BaseLogQueryClient {
     onRecord: (record: LogRecord) => void,
     opts: SignozTailOptions = {},
   ): TailHandle {
+    if (this.#tail.api.transport.closed) {
+      throw new CancelledError("logging.tail: client is closed");
+    }
     const controller = new AbortController();
     const stopped = (): boolean => controller.signal.aborted;
     const retryDelay = opts.reconnectDelayMs ?? opts.intervalMs ?? 1000;

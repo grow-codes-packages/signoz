@@ -310,7 +310,9 @@ impl SignozQueryClient {
             end: aq.end,
         }
         .resolve();
-        let (raw, warnings) = self.query_range(op, request_type, start, end, spec).await?;
+        let (raw, warnings) = self
+            .builder_query(op, request_type, start, end, spec)
+            .await?;
         let mut out = AggregateResult {
             warnings,
             ..AggregateResult::default()

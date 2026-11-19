@@ -218,10 +218,22 @@ func (q *QueryClient) queryRange(ctx context.Context, op, requestType string, st
 	if err := decode(op, raw, &data); err != nil {
 		return nil, nil, err
 	}
+	msgs := q.warnings(op, data)
+	if len(data.Data.Results) == 0 {
+		return nil, msgs, nil
+	}
+	return data.Data.Results[0], msgs, nil
+}
+
+// warnings returns the redacted warning messages of a query_range response
+// (also logged).
+func (q *QueryClient) warnings(op string, data queryRangeData) []string {
 	msgs := []string{}
 	if data.Warning != nil {
 		for _, w := range data.Warning.Warnings {
-			msgs = append(msgs, w.Message)
+			if w.Message != "" {
+				msgs = append(msgs, w.Message)
+			}
 		}
 		if len(msgs) == 0 && data.Warning.Message != "" {
 			msgs = append(msgs, data.Warning.Message)
@@ -231,10 +243,30 @@ func (q *QueryClient) queryRange(ctx context.Context, op, requestType string, st
 		}
 		q.warn(op, msgs)
 	}
-	if len(data.Data.Results) == 0 {
-		return nil, msgs, nil
+	return msgs
+}
+
+// QueryRangeResult is the result of QueryClient.QueryRange.
+type QueryRangeResult struct {
+	// Data is the "data" member of the response envelope, undecoded.
+	Data json.RawMessage `json:"data"`
+	// Warnings are the server warnings (also logged).
+	Warnings []string `json:"warnings"`
+}
+
+// QueryRange posts a raw request body to POST /api/v5/query_range and returns
+// the envelope's data plus the server warnings. It is the escape hatch for
+// queries the typed helpers do not cover (formulas, PromQL, ClickHouse SQL,
+// several queries at once).
+func (q *QueryClient) QueryRange(ctx context.Context, body any) (QueryRangeResult, error) {
+	const op = "queryRange"
+	raw, err := q.call(ctx, op, http.MethodPost, "/api/v5/query_range", nil, body, true)
+	if err != nil {
+		return QueryRangeResult{}, err
 	}
-	return data.Data.Results[0], msgs, nil
+	var data queryRangeData
+	_ = json.Unmarshal(raw, &data) // warnings only; Data is returned as sent by the server
+	return QueryRangeResult{Data: json.RawMessage(raw), Warnings: q.warnings(op, data)}, nil
 }
 
 // rawRow is one row of a raw (logs / spans) result.
