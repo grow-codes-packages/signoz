@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/grow-codes-packages/signoz/compare/java-v0.1.1...java-v0.1.2) (2026-11-19)
+
+
+### Dependencies
+
+* **java:** Bump the java group across 2 directories with 14 updates ([#15](https://github.com/grow-codes-packages/signoz/issues/15)) ([271b193](https://github.com/grow-codes-packages/signoz/commit/271b1939e7cf65f8567d83502ad61d456862c57d))
+
 ## [0.1.1](https://github.com/grow-codes-packages/signoz/compare/java-v0.1.0...java-v0.1.1) (2026-11-19)
 
 
