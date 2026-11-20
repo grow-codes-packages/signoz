@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/grow-codes-packages/signoz/compare/java-v0.1.2...java-v0.2.0) (2026-11-20)
+
+
+### Features
+
+* sync signoz to sdk-kit 0.4.0 (foundation API) ([#17](https://github.com/grow-codes-packages/signoz/issues/17)) ([b0fd8c6](https://github.com/grow-codes-packages/signoz/commit/b0fd8c67fb78feb2914a66fe63b783c55d2d6249))
+
 ## [0.1.2](https://github.com/grow-codes-packages/signoz/compare/java-v0.1.1...java-v0.1.2) (2026-11-19)
 
 
