@@ -21,6 +21,7 @@
 mod batch;
 mod client;
 mod exporter;
+mod init;
 mod query;
 pub mod record;
 mod redaction;
@@ -35,6 +36,10 @@ pub use batch::{
 };
 pub use client::{BatchingLogClient, BatchingLogClientBuilder, LogClient, LogEntry, Logger};
 pub use exporter::{ExportOptions, ExportResult, LogExporter};
+pub use init::{
+    connect_log_client, current_request_id, init_logging, with_request_id, InitOptions, LineWriter,
+    LogConnection, LogConnector, LoggingHandle, LOG_SHIPPED_FIELD,
+};
 pub use query::{
     poll_tail, wait_for_log, LogQueryClient, LogSearchResult, RecordCallback, RecordPredicate,
     SearchOptions, SortOrder, TailHandle, TailOptions, WaitOptions,

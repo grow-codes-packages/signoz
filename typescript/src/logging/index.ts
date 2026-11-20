@@ -60,3 +60,22 @@ export {
   type WinstonInfo,
   type WinstonTransportOptions,
 } from "./winston.js";
+export {
+  LOG_SHIPPED_FIELD,
+  currentRequestId,
+  getLogging,
+  initLogging,
+  stdoutLine,
+  withRequestId,
+  type InitLoggingOptions,
+  type LogConnection,
+  type LogConnector,
+  type LoggingHandle,
+} from "./init.js";
+export {
+  requestLogger,
+  type RequestLike,
+  type RequestLoggerOptions,
+  type RequestMiddleware,
+  type ResponseLike,
+} from "./request.js";

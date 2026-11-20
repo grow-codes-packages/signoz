@@ -22,6 +22,19 @@ from ._client import (
     current_trace_context,
 )
 from ._exporter import AsyncLogExporter, LogExporter
+from ._init import (
+    LOG_SHIPPED_FIELD,
+    JsonStdoutFormatter,
+    LogConnection,
+    LogConnector,
+    flush_logging,
+    init_logging,
+    logging_client,
+    request_id_var,
+    send_canary,
+    shutdown_logging,
+)
+from ._middleware import RequestLoggingMiddleware, RequestLoggingWSGIMiddleware
 from ._model import (
     AttrValue,
     ExportResult,
@@ -96,4 +109,17 @@ __all__ = [
     "StructlogProcessor",
     "structlog_processor",
     "to_attr_value",
+    # foundation (init_logging)
+    "LOG_SHIPPED_FIELD",
+    "JsonStdoutFormatter",
+    "LogConnection",
+    "LogConnector",
+    "flush_logging",
+    "init_logging",
+    "logging_client",
+    "request_id_var",
+    "send_canary",
+    "shutdown_logging",
+    "RequestLoggingMiddleware",
+    "RequestLoggingWSGIMiddleware",
 ]
