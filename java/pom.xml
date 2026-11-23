@@ -60,7 +60,7 @@
     <!-- runtime -->
     <jackson.version>2.23.0</jackson.version>
     <opentelemetry.version>1.68.0</opentelemetry.version>
-    <logback.version>1.6.6</logback.version>
+    <logback.version>1.6.7</logback.version>
     <log4j.version>2.26.1</log4j.version>
     <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
     <!-- same OkHttp the OTLP exporter ships with (opentelemetry-exporter-sender-okhttp) -->
